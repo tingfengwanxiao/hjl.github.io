@@ -8,7 +8,7 @@
 # Site settings
 title: LiangLab
 moto: May the code also cure you.
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/hjl.github.io" # the subpath of your site, e.g. /blog
 url: "https://emous.github.io" # the base hostname & protocol for your site
 owner: LiangLab
 
