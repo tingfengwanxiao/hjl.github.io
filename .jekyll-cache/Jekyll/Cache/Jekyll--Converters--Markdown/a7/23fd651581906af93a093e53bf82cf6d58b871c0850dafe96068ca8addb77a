@@ -1,0 +1,175 @@
+I"T<ul id="markdown-toc">
+  <li><a href="#稀疏矩阵" id="markdown-toc-稀疏矩阵">稀疏矩阵</a>    <ul>
+      <li><a href="#数据结构" id="markdown-toc-数据结构">数据结构</a></li>
+      <li><a href="#转置" id="markdown-toc-转置">转置</a></li>
+    </ul>
+  </li>
+  <li><a href="#普通算法" id="markdown-toc-普通算法">普通算法</a></li>
+  <li><a href="#快速转置算法" id="markdown-toc-快速转置算法">快速转置算法</a></li>
+</ul>
+<p>本文将阐述我是如何理解严蔚敏老师«数据结构»中的稀疏矩阵及其相关的三元组定义方式，以及与之相关的快速转置算法。</p>
+
+<hr />
+
+<h2 id="稀疏矩阵">稀疏矩阵</h2>
+
+<p>假设在\(m \times n\)的矩阵中，有\(t\)个<strong>不为零</strong>的元素。令\(\delta=\frac{t}{m \times n}\)，称\(\delta\)为<strong>稀疏因子</strong>。通常认为\(\delta\le0.05\)时，该矩阵则可以被称作<strong>稀疏矩阵</strong>。</p>
+
+<h3 id="数据结构">数据结构</h3>
+
+<p>通常使用<strong>三元组顺序表</strong>的形式来压缩表示一个稀疏矩阵，每个三元组包括的信息有：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">i</code> 非零元素的行下标</li>
+  <li><code class="language-plaintext highlighter-rouge">j</code> 非零元素的列下标</li>
+  <li><code class="language-plaintext highlighter-rouge">e</code> 元素值</li>
+</ul>
+
+<p>三元组顺序表又将和一些<strong>元信息</strong>一起保存在一个联合结构（书中写的是union但我认为应该使用 struct，否则mu,nu,tu的数据会被覆盖）中以表示一个稀疏矩阵，这些基础信息包括：</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">mu</code> 矩阵的行数</li>
+  <li><code class="language-plaintext highlighter-rouge">nu</code> 矩阵的列数</li>
+  <li><code class="language-plaintext highlighter-rouge">tu</code> 矩阵非零元素的总个数</li>
+</ul>
+
+<p>若使用<del>伪</del>C语言，可以有具体的如下定义。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp"># define MAXSIZE 12500 			// 最大的非零元素个数
+</span><span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">;</span>					<span class="c1">// 分别表示非零元素的行下标和列下标</span>
+    <span class="n">ElemType</span> <span class="n">e</span><span class="p">;</span>					<span class="c1">// 元素值</span>
+<span class="p">}</span><span class="n">Triple</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">union</span><span class="p">{</span>
+    <span class="n">Triple</span> <span class="n">data</span><span class="p">[</span><span class="n">MAXSIZE</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span> 	<span class="c1">// 所有的非零元素， data[0]弃用</span>
+    <span class="kt">int</span> <span class="n">mu</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">tu</span><span class="p">;</span>				<span class="c1">// 矩阵的行数、列数和总共的非零元素个数</span>
+<span class="p">}</span><span class="n">TSMatrix</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><strong>其实还有一个隐性的要求（虽然书中并没有明确说明）：</strong>data中的数据以<strong>行</strong>为<strong>主序</strong>存储（从第一行起依次存储）。</p>
+
+<h3 id="转置">转置</h3>
+
+<p>根据上述的数据结构，若要将<code class="language-plaintext highlighter-rouge">TSMatrix before</code>转置成<code class="language-plaintext highlighter-rouge">TSMatrix after</code>，则务必需要经历如下三个步骤：</p>
+
+<ol>
+  <li>将<code class="language-plaintext highlighter-rouge">TSMatrix</code>中的元信息<code class="language-plaintext highlighter-rouge">mu</code>、<code class="language-plaintext highlighter-rouge">nu</code>互换。</li>
+  <li>将<code class="language-plaintext highlighter-rouge">data</code>中每个<code class="language-plaintext highlighter-rouge">Triple</code>的<code class="language-plaintext highlighter-rouge">i</code>和<code class="language-plaintext highlighter-rouge">j</code>互换。</li>
+  <li>重新整理<code class="language-plaintext highlighter-rouge">data</code>使其满足<strong>行主序</strong>。<strong>（难以实现）</strong></li>
+</ol>
+
+<div style="text-align: center;"><img style="height:400px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/TSMatrix/TS_Trans.png" /></div>
+
+<h2 id="普通算法">普通算法</h2>
+
+<p>最直观的想法是：因为<strong>转置后行列互换</strong>，转置后需要确保行主序，因此直接从<code class="language-plaintext highlighter-rouge">before</code>的第一列开始以<strong>列遍历</strong>处理。</p>
+
+<p>对于具体的某一列，<strong>遍历所有的非零元素</strong>，判断每个元素的列值是否等于当前列。又因为，<code class="language-plaintext highlighter-rouge">data</code>是按照<strong>行值排列</strong>的，可以确保在<code class="language-plaintext highlighter-rouge">after.data</code>中的每<strong>行</strong>元素也一定可以按照<strong>列值</strong>从小到大排列。</p>
+
+<div style="text-align: center;"><img style="height:400px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/TSMatrix/TSMatrix_trans_normal.gif" /></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">TransposeSMatrix</span><span class="p">(</span><span class="n">TSMatrix</span> <span class="n">before</span><span class="p">,</span> <span class="n">TSMatrix</span> <span class="o">&amp;</span><span class="n">after</span><span class="p">){</span>
+	<span class="n">after</span><span class="p">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">nu</span><span class="p">;</span> <span class="n">after</span><span class="p">.</span><span class="n">nu</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">mu</span><span class="p">;</span> <span class="n">after</span><span class="p">.</span><span class="n">tu</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">tu</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">after</span><span class="p">.</span><span class="n">tu</span><span class="p">){</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// after.data的写入指针</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">col</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">col</span> <span class="o">&lt;=</span> <span class="n">before</span><span class="p">.</span><span class="n">nu</span><span class="p">;</span> <span class="o">++</span><span class="n">col</span><span class="p">){</span>
+            <span class="c1">// 遍历列</span>
+            <span class="k">for</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">p</span> <span class="o">&lt;=</span> <span class="n">before</span><span class="p">.</span><span class="n">tu</span><span class="p">;</span> <span class="o">++</span><span class="n">p</span><span class="p">){</span>
+               	<span class="c1">// 遍历before.data</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">j</span> <span class="o">==</span> <span class="n">col</span><span class="p">){</span>
+                    <span class="c1">// 元素的列正好是当前被遍历的列</span>
+                    <span class="n">after</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">i</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">j</span><span class="p">;</span> 
+                    <span class="n">after</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">j</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">i</span><span class="p">;</span>
+                    
+                    <span class="n">after</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">e</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">e</span><span class="p">;</span>
+                    <span class="o">++</span><span class="n">q</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+	<span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>该算法的时间复杂度为\(O(nu \times tu)\)，又因为\(tu\)和\(mu \times nu\)同数量级，因此实际复杂度为\(O(nu^2 \times mu)\)，相比于<strong>非压缩情况</strong>的转置算法的时间复杂度\(O(nu \times mu)\)要耗时很多，除非\(tu &lt;&lt; mu \times nu\)。所以我们需要探究一个时间复杂度更低的转置算法，用空间换取时间。</p>
+
+<h2 id="快速转置算法">快速转置算法</h2>
+
+<p>和<a href="/2019/05/09/KMP/">KMP</a>相似的，我们可以通过<strong>预处理</strong><code class="language-plaintext highlighter-rouge">before</code>获取一些提炼出一些额外的信息，从而<strong>避免嵌套的循环</strong>。目标如下：只遍历一次<code class="language-plaintext highlighter-rouge">before.data</code>，将每个元素行列互换后填入<code class="language-plaintext highlighter-rouge">after.data</code>的<strong>合适</strong>的位置。</p>
+
+<p>那么需要预处理出哪些信息才能在遍历时直接得出合适的位置呢？可以做如下的思考：</p>
+
+<ul>
+  <li>转置的实质是行列互换。
+    <ul>
+      <li>因此如果知道<code class="language-plaintext highlighter-rouge">before.data</code>中<strong>某列的第1个非0元素</strong>在<code class="language-plaintext highlighter-rouge">after.data</code>中的位置\(pos\)（某行的第1个非0元素），那么这一列的<strong>下一个非0元素</strong>在<code class="language-plaintext highlighter-rouge">after.data</code>中的位置一定为\(pos+1\)，因为<code class="language-plaintext highlighter-rouge">data</code>是行主序的。</li>
+    </ul>
+  </li>
+  <li>又<code class="language-plaintext highlighter-rouge">before.data</code>是行主序的
+    <ul>
+      <li>又因为，遍历<code class="language-plaintext highlighter-rouge">before.data</code>时是可以必然确保对于<strong>特定的列</strong>，遍历的次序<strong>一定是按照行号从低到高</strong>进行的。
+        <ul>
+          <li>例如：本例中（列数为1）的第3个元素行号是3，第7个元素行号是6，行号随着遍历是从低到高的。</li>
+        </ul>
+      </li>
+      <li>因此如果知道<code class="language-plaintext highlighter-rouge">before.data</code>中<strong>每列的第1个非0元素</strong>在<code class="language-plaintext highlighter-rouge">after.data</code>中的位置，只需要遍历一遍<code class="language-plaintext highlighter-rouge">before.data</code>就可以把<code class="language-plaintext highlighter-rouge">after.data</code>计算出来。</li>
+    </ul>
+  </li>
+  <li>如何计算<code class="language-plaintext highlighter-rouge">before.data</code>中<strong>每列的第1个非0元素</strong>在<code class="language-plaintext highlighter-rouge">after.data</code>中的位置?
+    <ul>
+      <li>递推：<strong>上一列的第1个非0元素</strong>在<code class="language-plaintext highlighter-rouge">after.data</code>中的位置 + <strong>上一列非0元素的总个数</strong></li>
+    </ul>
+  </li>
+  <li>如何求<code class="language-plaintext highlighter-rouge">before.data</code>中<strong>每列非0元素</strong>的总个数？
+    <ul>
+      <li><strong>遍历before.data(tu)就行</strong></li>
+    </ul>
+  </li>
+</ul>
+
+<p>所以总的算法过程就应该是：</p>
+
+<ol>
+  <li>遍历<code class="language-plaintext highlighter-rouge">before.data</code>，求出<code class="language-plaintext highlighter-rouge">before.data</code>中<strong>每列非0元素</strong>的总个数<code class="language-plaintext highlighter-rouge">num[]</code>。</li>
+  <li></li>
+  <li>初始化<code class="language-plaintext highlighter-rouge">before.data</code>中第1列的第1个非0元素在<code class="language-plaintext highlighter-rouge">after.data</code>中的位置为1。</li>
+  <li>遍历<code class="language-plaintext highlighter-rouge">before.data</code>中所有的列，配合<code class="language-plaintext highlighter-rouge">num[]</code>递推出，<code class="language-plaintext highlighter-rouge">before.data</code>中<strong>每列的第1个非0元素</strong>在<code class="language-plaintext highlighter-rouge">after.data</code>中的位置<code class="language-plaintext highlighter-rouge">cpot[]</code>。</li>
+  <li>遍历<code class="language-plaintext highlighter-rouge">before.data(tu)</code>，遇到的每一个元素都<strong>视作它所在列的第一个元素</strong>，根据<code class="language-plaintext highlighter-rouge">cpot[col]</code>填入<code class="language-plaintext highlighter-rouge">after.data</code>中，再把<code class="language-plaintext highlighter-rouge">cpot[col]</code>自增1。</li>
+</ol>
+
+<div style="text-align: center;"><img style="height:400px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/TSMatrix/TSMatrix_fasttrans.gif" /></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">FastTransposeSMatrix</span><span class="p">(</span><span class="n">TSMatrix</span> <span class="n">before</span><span class="p">,</span> <span class="n">TSMatrix</span> <span class="o">&amp;</span><span class="n">after</span><span class="p">){</span>
+	<span class="n">after</span><span class="p">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">nu</span><span class="p">;</span> <span class="n">after</span><span class="p">.</span><span class="n">nu</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">mu</span><span class="p">;</span> <span class="n">after</span><span class="p">.</span><span class="n">tu</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">tu</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">after</span><span class="p">.</span><span class="n">tu</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">col</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">col</span> <span class="o">&lt;=</span> <span class="n">before</span><span class="p">.</span><span class="n">nu</span><span class="p">;</span> <span class="o">++</span><span class="n">col</span><span class="p">){</span>
+            <span class="n">num</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">t</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">before</span><span class="p">.</span><span class="n">tu</span><span class="p">;</span> <span class="o">++</span><span class="n">t</span><span class="p">){</span>
+        	<span class="c1">// 通过每一个before.data中的元素计数，得出每列非0元素数量</span>
+            <span class="o">++</span><span class="n">num</span><span class="p">[</span><span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">t</span><span class="p">].</span><span class="n">j</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="c1">// 递推计算before.data中每列的第1个非0元素在after.data中的位置,初始化</span>
+        <span class="n">cpot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">col</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="n">col</span> <span class="o">&lt;=</span> <span class="n">before</span><span class="p">.</span><span class="n">nu</span><span class="p">;</span> <span class="o">++</span><span class="n">col</span><span class="p">){</span>
+            <span class="n">cpot</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">cpot</span><span class="p">[</span><span class="n">col</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">num</span><span class="p">[</span><span class="n">col</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="c1">// 填入after.data</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">p</span> <span class="o">&lt;=</span> <span class="n">before</span><span class="p">.</span><span class="n">tu</span><span class="p">;</span> <span class="o">++</span><span class="n">p</span><span class="p">){</span>
+            <span class="c1">// 每个被遍历到的非0元素都被视作，它所在列的第1个非0元素</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">j</span><span class="p">;</span> <span class="n">q</span> <span class="o">=</span> <span class="n">cpot</span><span class="p">[</span><span class="n">col</span><span class="p">];</span>
+            
+            <span class="n">after</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">i</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">j</span><span class="p">;</span>
+            <span class="n">after</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">j</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">i</span><span class="p">;</span>
+            <span class="n">after</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">e</span> <span class="o">=</span> <span class="n">before</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">e</span><span class="p">;</span>
+            
+            <span class="c1">// 当该列下一个元素被遍历到时，正好需要后移一位</span>
+            <span class="o">++</span><span class="n">cpot</span><span class="p">[</span><span class="n">col</span><span class="p">];</span>          
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>综上可以分析出其时间复杂度为\(O(nu + tu)\) 即 \(O(nu + nu \times mu)\) 即 \(O(nu \times mu)\)。</p>
+:ET

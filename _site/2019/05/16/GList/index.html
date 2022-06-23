@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>数据结构（六）：广义表</title>
+  <meta name="description"
+    content="相比于线性表，广义表基于递归定义，可以将广义表本身作为结点存储在其元素中从而体现出更灵活的且宽泛的使用性。虽然，抽象数据类型——数组，也可以提供这类似的宽泛的数据储存功能，但它的长度和维度必须是定义时确定的，而广义表基于递归定义，可在使用时随时扩充删减元素。">
+  <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+
+  <link rel="stylesheet" href="/css/main.css ">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+  <link rel="canonical" href="http://localhost:4000/2019/05/16/GList/">
+  <link rel="alternate" type="application/rss+xml" title="LiangLab"
+    href="http://localhost:4000/feed.xml ">
+
+  
+  
+  <script>
+    // google analytics
+    (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-137230515-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    tex2jax: { inlineMath: [["$","$"],["\\(","\\)"]] },
+    "HTML-CSS": {
+      linebreaks: { automatic: true, width: "container" }
+    }
+});
+</script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  
+  <script src="/demos/base/js/demo-made.js"></script>
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>数据结构（六）：广义表 | LiangLab</title>
+<meta name="generator" content="Jekyll v4.2.2" />
+<meta property="og:title" content="数据结构（六）：广义表" />
+<meta name="author" content="Anon" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="相比于线性表，广义表基于递归定义，可以将广义表本身作为结点存储在其元素中从而体现出更灵活的且宽泛的使用性。虽然，抽象数据类型——数组，也可以提供这类似的宽泛的数据储存功能，但它的长度和维度必须是定义时确定的，而广义表基于递归定义，可在使用时随时扩充删减元素。" />
+<meta property="og:description" content="相比于线性表，广义表基于递归定义，可以将广义表本身作为结点存储在其元素中从而体现出更灵活的且宽泛的使用性。虽然，抽象数据类型——数组，也可以提供这类似的宽泛的数据储存功能，但它的长度和维度必须是定义时确定的，而广义表基于递归定义，可在使用时随时扩充删减元素。" />
+<link rel="canonical" href="http://localhost:4000/2019/05/16/GList/" />
+<meta property="og:url" content="http://localhost:4000/2019/05/16/GList/" />
+<meta property="og:site_name" content="LiangLab" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-05-16T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="数据结构（六）：广义表" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/05/16/GList/","author":{"@type":"Person","name":"Anon"},"@type":"BlogPosting","description":"相比于线性表，广义表基于递归定义，可以将广义表本身作为结点存储在其元素中从而体现出更灵活的且宽泛的使用性。虽然，抽象数据类型——数组，也可以提供这类似的宽泛的数据储存功能，但它的长度和维度必须是定义时确定的，而广义表基于递归定义，可在使用时随时扩充删减元素。","headline":"数据结构（六）：广义表","dateModified":"2019-05-16T00:00:00+08:00","datePublished":"2019-05-16T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/05/16/GList/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+  <body style="background:white;">
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">LiangLab</a>
+
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>文章
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>博客
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>数据结构（六）：广义表</h1>
+        <div>
+            <hr>
+        </div>
+
+
+
+
+        <div class="label">
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-calendar"></i>2019-05-16
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-user"></i>Anon
+                
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" >
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#数据结构" title="Category: 数据结构" rel="category">数据结构</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#定义" id="markdown-toc-定义">定义</a></li>
+  <li><a href="#存储结构" id="markdown-toc-存储结构">存储结构</a>    <ul>
+      <li><a href="#头尾链表存储表示" id="markdown-toc-头尾链表存储表示">头尾链表存储表示</a></li>
+      <li><a href="#扩展线性链表存储表示" id="markdown-toc-扩展线性链表存储表示">扩展线性链表存储表示</a></li>
+    </ul>
+  </li>
+  <li><a href="#m元多项式的表示" id="markdown-toc-m元多项式的表示">$m$元多项式的表示</a></li>
+  <li><a href="#广义表的递归算法" id="markdown-toc-广义表的递归算法">广义表的递归算法</a>    <ul>
+      <li><a href="#求广义表的深度" id="markdown-toc-求广义表的深度">求广义表的深度</a>        <ul>
+          <li><a href="#分析" id="markdown-toc-分析">分析</a></li>
+        </ul>
+      </li>
+      <li><a href="#广义表的复制" id="markdown-toc-广义表的复制">广义表的复制</a></li>
+      <li><a href="#基于字符串创建广义表" id="markdown-toc-基于字符串创建广义表">基于字符串创建广义表</a></li>
+    </ul>
+  </li>
+</ul>
+<p>相比于线性表，广义表基于递归定义，可以将广义表本身作为结点存储在其元素中从而体现出更灵活的且宽泛的使用性。虽然，抽象数据类型——数组，也可以提供这类似的宽泛的数据储存功能，但它的长度和维度必须是定义时确定的，而广义表基于递归定义，可在使用时随时扩充删减元素。</p>
+
+<hr />
+
+<h2 id="定义">定义</h2>
+
+<p>广义表时线性表的推广，也可以被称作<strong>列表</strong>（List）。最为常见的广义表的应用就是Lisp语言，其源程序本身就是一系列广义表。</p>
+
+<p>广义表一般记作：$LS = (a_1,a_2,…,a_n)$。</p>
+
+<p>其中，LS为广义表的名称，n为其长度。与线性表不同的地方在于，<strong>$a_i$可以是单个元素也可以是广义表</strong>，它们分别成为广义表LS的<strong>原子</strong>和<strong>子表</strong>。习惯上，大写字母用来表示广义表的名称，小写字母用来表示原子。</p>
+
+<p>当广义表LS非空时，第一个元素$a_1$为LS的表头(Head)，<strong>其余元素组成的表$(a_2,a_3,…,a_n)$</strong>是LS的表尾(Tail)。</p>
+
+<ol>
+  <li>$A = ()$ ， A是一个空表，它的长度为0。</li>
+  <li>$B = (e)$，B是一个只包含一个原子$e$的表，它的长度为1。</li>
+  <li>$C = (a,(b,c,d))$，C的长度为2，元素分别为原子$a$和子表$(b,c,d)$。</li>
+  <li>$D = (A,B,C)$，D的长度是3，元素分别为A,B,C一共3个子表。</li>
+</ol>
+
+<p>$GetHead(D) = A  \qquad  GetTail(D) = (B,C)$</p>
+
+<h2 id="存储结构">存储结构</h2>
+
+<p>广义表的数据元素具有不同的结构，因此难以使用顺序存储结构表示，通常使用链式存储结构表示，主要有两种方式。</p>
+
+<h3 id="头尾链表存储表示">头尾链表存储表示</h3>
+
+<p>由于数据元素既可能是原子又可能是广义表，所以需要两种结构的结点（可以使用联合类型实现）：</p>
+
+<ul>
+  <li>表结点，用于表示列表</li>
+  <li>原子结点，用于表示原子。</li>
+</ul>
+
+<p>由于上述定义，只要列表非空则可以确定为表头和表尾。</p>
+
+<p>所以，一个表结点可以由三个域组成：<strong>标志域</strong>、<strong>指示表头的指针域</strong>和<strong>指示表尾的指针域</strong>。</p>
+
+<p>然而，一个原子结点只需要两个域组成：<strong>标志域</strong>和<strong>值域</strong>。</p>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/GList/List_Node.png" /></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 广义表的头尾链表存储表示</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span><span class="n">ATOM</span><span class="p">,</span> <span class="n">LIST</span><span class="p">}</span> <span class="n">ElemTag</span><span class="p">;</span>	<span class="c1">// ATOM 原子	LIST 子表</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">GLNode</span><span class="p">{</span>
+    <span class="n">ElemTag</span> <span class="n">tag</span><span class="p">;</span>					<span class="c1">// 标志域</span>
+    <span class="k">union</span><span class="p">{</span>
+        <span class="n">AtomType</span>	<span class="n">atom</span><span class="p">;</span>			<span class="c1">// 值域</span>
+        <span class="k">struct</span><span class="p">{</span>	<span class="k">struct</span> <span class="n">GLNode</span> <span class="o">*</span> <span class="n">hp</span><span class="p">,</span> <span class="o">*</span><span class="n">tp</span><span class="p">;}</span><span class="n">ptr</span><span class="p">;</span>	<span class="c1">// 表头指针域 表尾指针域</span>
+    <span class="p">}</span>
+<span class="p">}</span><span class="o">*</span> <span class="n">GList</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>基于头尾链表存储表示的具体广义表示意图：</p>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/GList/List_2.png" /></div>
+
+<p>可以总结如下规律：</p>
+
+<ol>
+  <li>空表的表头指针指向空。</li>
+  <li><strong>非空列表的表头指针</strong>指向具体的<strong>表结点</strong>。（而不是说表头指针自身就是表结点）</li>
+  <li>可以直接的看出原子和子表所在的层次。</li>
+  <li><strong>最高层表结点的个数就是列表的长度</strong>。</li>
+</ol>
+
+<h3 id="扩展线性链表存储表示">扩展线性链表存储表示</h3>
+
+<p>这种表示方式和传统的线性表（链表）很相似，至少每种结点都存在一个Next指针，表结点还存在表头指针。</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/GList/List_3.png" /></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 广义表的扩展线性链表存储表示</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span><span class="n">ATOM</span><span class="p">,</span> <span class="n">LIST</span><span class="p">}</span> <span class="n">ElemTag</span><span class="p">;</span>	<span class="c1">// ATOM 原子	LIST 子表</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">GLNode</span><span class="p">{</span>
+    <span class="n">ElemTag</span> <span class="n">tag</span><span class="p">;</span>					<span class="c1">// 标志域</span>
+    <span class="k">union</span><span class="p">{</span>
+        <span class="n">AtomType</span>	<span class="n">atom</span><span class="p">;</span>			<span class="c1">// 值域</span>
+        <span class="k">struct</span> <span class="n">GLNode</span> <span class="o">*</span><span class="n">hp</span><span class="p">;</span>			<span class="c1">// 表结点的表头指针</span>
+    <span class="p">};</span>
+    <span class="k">struct</span> <span class="n">GLNode</span> <span class="o">*</span><span class="n">tp</span><span class="p">;</span>				<span class="c1">// 相当于线性链表的next,指向下一个元素结点</span>
+<span class="p">}</span><span class="o">*</span> <span class="n">GList</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>基于扩展线性链表存储表示的具体广义表示意图：</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/GList/List_4.png" /></div>
+
+<h2 id="m元多项式的表示">$m$元多项式的表示</h2>
+
+<p>对于m元多项式，可以通过<strong>抽离公共元</strong>的形式将大式化成<strong>以少一个元的小式为系数</strong>的一元多项式。</p>
+
+<p>例如:</p>
+
+<p>$P(x, y, z)=x^{10} y^{3} z^{2}+2 x^{6} y^{3} z^{2}+3 x^{5} y^{2} z^{2}+x^{4} y^{4} z+6 x^{3} y^{4} z+2 y z+15$</p>
+
+<p>可以改写成：</p>
+
+<p>$p(x, y, z)=\left(\left(x^{10}+2 x^{6}\right) y^{3}+3 x^{5} y^{2}\right) z^{2}+\left(\left(x^{4}+6 x^{3}\right) y^{4}+2 y\right) z+15$</p>
+
+<p>再把化简后的式子用广义表表示，<del>（其实这个书上的(A,2)这样的表示不正确，2应该是A的元信息，而不是和A同级）</del></p>
+
+<p>$P=z((A, 2),(B, 1),(15,0))$</p>
+
+<p>右边的列表中的每个元素分别为，关于$z$的一元多项式的每个系数和指数构成的列表。同理的，可以递推出$A,B$。</p>
+
+<p>$A=y((C, 3),(D, 2))$
+	$C=x((1,10),(2,6))$
+	$D=x((3,5))$
+$B=y((E, 4),(F, 1))$
+	$E=x((1,4)),(6,3) )$
+	$F=x((2,0))$</p>
+
+<p>若以广义表的扩展线性链表存储表示其存储结构，则结点结构为：</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/GList/List_5.png" /></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">MPNode</span><span class="p">{</span>
+    <span class="n">ElemTag</span> <span class="n">tag</span><span class="p">;</span>			<span class="c1">// 区分结点类型</span>
+    <span class="kt">int</span>		<span class="n">exp</span><span class="p">;</span>			<span class="c1">// 指数域</span>
+    
+    <span class="k">union</span><span class="p">{</span>
+        <span class="kt">float</span> <span class="n">coef</span><span class="p">;</span> 		<span class="c1">// 系数域</span>
+        <span class="k">struct</span> <span class="n">MPNode</span> <span class="o">*</span> <span class="n">hp</span><span class="p">;</span>	<span class="c1">// 表结点的表头指针</span>
+    <span class="p">}</span>
+    <span class="k">struct</span> <span class="n">MPNode</span> <span class="o">*</span> <span class="n">tp</span><span class="p">;</span>		<span class="c1">// next指针</span>
+<span class="p">}</span><span class="o">*</span> <span class="n">MPList</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/GList/List_6.png" /></div>
+
+<h2 id="广义表的递归算法">广义表的递归算法</h2>
+
+<h3 id="求广义表的深度">求广义表的深度</h3>
+
+<p>广义表的深度定义为广义表中<strong>括弧的重数</strong>，例如多元多项式广义表的深度就是该多项式中的变元个数。</p>
+
+<h4 id="分析">分析</h4>
+
+<p>设非空广义表为</p>
+
+<p>$LS = (a_1,a_2,…,a_n)$</p>
+
+<p>其中$a_i(i=1,2,…,n)$或为原子或为子表，那么求LS的深度可以分解为n个问题。每个子问题为求$a_i$的深度，若$a_i$是原子，则深度为0。若$a_i$为广义表，则按照上述处理，而$LS$为上述n个深度的最大值加1。定义空表的深度为1。</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/GList/List_7.png" /></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">GListDepth</span><span class="p">(</span><span class="n">GList</span> <span class="n">L</span><span class="p">){</span>
+    <span class="c1">// 采用头尾链表存储结构</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">L</span><span class="p">)</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span> 					<span class="c1">// 空表深度为1</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">L</span><span class="o">-&gt;</span><span class="n">tag</span> <span class="o">==</span> <span class="n">ATOM</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> 		<span class="c1">// 原子深度为0</span>
+    <span class="k">for</span><span class="p">(</span><span class="n">max</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="n">L</span><span class="p">;</span> <span class="n">pp</span><span class="p">;</span> <span class="n">pp</span> <span class="o">=</span> <span class="n">pp</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">.</span><span class="n">tp</span><span class="p">){</span>
+        <span class="n">dep</span> <span class="o">=</span> <span class="n">GListDepth</span><span class="p">(</span><span class="n">pp</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">.</span><span class="n">hp</span><span class="p">);</span>	<span class="c1">// pp-&gt;ptr.hp指向子表 或 原子</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">dep</span> <span class="o">&gt;</span> <span class="n">max</span><span class="p">)</span><span class="n">max</span> <span class="o">=</span> <span class="n">dep</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">max</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="广义表的复制">广义表的复制</h3>
+
+<p>任何一个非空广义表都可以分解成表头和表尾，一对确定的表头和表尾也可以唯一确定一个广义表。所以，复制一个广义表只需要分别复制表头和表尾，然后合成即可。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">CopyGList</span><span class="p">(</span><span class="n">GList</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">,</span> <span class="n">GList</span> <span class="n">L</span><span class="p">){</span>
+    <span class="c1">// 采用头尾链表存储结构，由广义表L复制得到广义表T。</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">L</span><span class="p">)</span> <span class="n">T</span> <span class="o">=</span> <span class="n">null</span><span class="p">;</span>
+   	<span class="k">else</span><span class="p">{</span>
+        <span class="c1">// 不是空表，就需要建立表结点</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">T</span> <span class="o">=</span> <span class="p">(</span><span class="n">GList</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">GLNode</span><span class="p">))))</span> <span class="n">exit</span><span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span>
+        <span class="n">T</span><span class="o">-&gt;</span><span class="n">tag</span> <span class="o">=</span> <span class="n">L</span><span class="o">-&gt;</span><span class="n">tag</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">L</span><span class="o">-&gt;</span><span class="n">tag</span> <span class="o">==</span> <span class="n">ATOM</span><span class="p">)</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">atom</span> <span class="o">=</span> <span class="n">L</span><span class="o">-&gt;</span><span class="n">atom</span><span class="p">;</span> <span class="c1">// 如果是原子直接复制</span>
+        
+        <span class="k">else</span><span class="p">{</span>
+            <span class="c1">// 复制表头</span>
+        	<span class="n">CopyGList</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">.</span><span class="n">hp</span><span class="p">,</span> <span class="n">L</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">.</span><span class="n">hp</span><span class="p">);</span>
+            <span class="c1">// 复制表尾</span>
+            <span class="n">CopyGList</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">.</span><span class="n">tp</span><span class="p">,</span> <span class="n">L</span><span class="o">-&gt;</span><span class="n">ptr</span><span class="p">.</span><span class="n">tp</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="基于字符串创建广义表">基于字符串创建广义表</h3>
+
+<p>下方将讨论如何将形如广义表形式的字符串解释成一个广义表。对于任意一个广义表字符串都可能有两种情况：</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">S = '()'</code>，这是一个空的广义表。</li>
+  <li><code class="language-plaintext highlighter-rouge">S = '(a1,a2,...,an)'</code>，$a_i$是S的子串，即S有n个子表。</li>
+</ol>
+
+<p>若采用<strong>头尾链表存储结构</strong>的方式存储生成的广义表，那么这个广义表有$n$个表结点序列。且第$i$个表结点的表尾指针指向第$i+1$个表结点。第$n$个表结点的表尾指针为<code class="language-plaintext highlighter-rouge">NULL</code>。如果把原子也看做子表的话，第$i$个表结点的表头指针<code class="language-plaintext highlighter-rouge">hp</code>指向由$a_i$建立的子表。</p>
+
+<p>由此，由S建广义表的问题可以转化成由$a_i$建子表的问题。$a_i$又有三种情况:</p>
+
+<ol>
+  <li>带括弧的空白串</li>
+  <li>长度为1的单字符串</li>
+  <li>长度$&gt;1$的字符串</li>
+</ol>
+
+<p>显然<strong>前两种情况为递归的终结状态</strong>，后一种情况为递归调用。</p>
+
+<p>假定函数<code class="language-plaintext highlighter-rouge">server(str,hstr)</code>的功能为，从字符串<code class="language-plaintext highlighter-rouge">str</code>中取出第一个<code class="language-plaintext highlighter-rouge">","</code>之前的子串复制给<code class="language-plaintext highlighter-rouge">hstr</code>，并使<code class="language-plaintext highlighter-rouge">str</code>成为删除子串<code class="language-plaintext highlighter-rouge">hstr</code>和<code class="language-plaintext highlighter-rouge">','</code>之后的剩余串。若<code class="language-plaintext highlighter-rouge">str</code>中没有字符<code class="language-plaintext highlighter-rouge">,</code>则操作后的<code class="language-plaintext highlighter-rouge">hstr</code>即为当前的<code class="language-plaintext highlighter-rouge">str</code>，而操作后的<code class="language-plaintext highlighter-rouge">str</code>为空串<code class="language-plaintext highlighter-rouge">NULL</code>。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">CreateGList</span><span class="p">(</span><span class="n">GList</span> <span class="o">&amp;</span><span class="n">L</span><span class="p">,</span> <span class="n">SString</span> <span class="n">S</span><span class="p">){</span>
+    <span class="c1">// 采用头尾链表存储结构，由广义表的书写形式串S创建广义表L。设emp= "()"</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">StrCompare</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">emp</span><span class="p">))</span> <span class="n">L</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="c1">// 创建空表</span>
+    <span class="k">else</span><span class="p">{</span>
+        <span class="c1">// 字符串非空，所以表中存在结点，所以初始化一个结点</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">L</span> <span class="o">=</span> <span class="p">(</span><span class="n">GList</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">GLNode</span><span class="p">))))</span> <span class="n">exit</span><span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">StrLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">){</span>
+            <span class="c1">// 如果就是单独的一个原子，一个字符</span>
+            <span class="n">L</span><span class="o">-&gt;</span><span class="n">tag</span> <span class="o">=</span> <span class="n">ATOM</span><span class="p">;</span>
+            <span class="n">L</span><span class="o">-&gt;</span><span class="n">atom</span> <span class="o">=</span> <span class="n">S</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+         	<span class="n">L</span><span class="o">-&gt;</span><span class="n">tag</span> <span class="o">=</span> <span class="n">LIST</span><span class="p">;</span> <span class="n">p</span> <span class="o">=</span> <span class="n">L</span><span class="p">;</span>
+            <span class="n">SubString</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">StrLength</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">);</span> <span class="c1">// 脱外层括号</span>
+            
+            <span class="k">do</span><span class="p">{</span>
+                <span class="c1">// 重复建造n个子表</span>
+                <span class="n">server</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span><span class="n">hsub</span><span class="p">);</span>
+                <span class="n">CreateGList</span><span class="p">(</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="n">p</span><span class="p">.</span><span class="n">hp</span><span class="p">,</span> <span class="n">hsub</span><span class="p">);</span> <span class="n">q</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">StrEmpty</span><span class="p">(</span><span class="n">sub</span><span class="p">)){</span>
+                    <span class="c1">// 表尾不空</span>
+                    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="n">GLNode</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">GLNode</span><span class="p">))))</span> <span class="n">exit</span><span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span>
+                    <span class="n">p</span><span class="o">-&gt;</span><span class="n">tag</span> <span class="o">=</span> <span class="n">LIST</span><span class="p">;</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">p</span><span class="p">.</span><span class="n">tp</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span><span class="k">while</span><span class="p">(</span><span class="o">!</span> <span class="n">strEmpty</span><span class="p">(</span><span class="n">sub</span><span class="p">));</span>
+            <span class="n">q</span><span class="o">-&gt;</span><span class="n">p</span><span class="p">.</span><span class="n">tp</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+<span class="p">}</span>
+</code></pre></div></div>
+
+
+        </article>
+        <br>
+        <div class="copyright">
+        <h4>文档信息</h4>
+        <ul>
+            <li>作者: 
+                
+                    Anon
+                
+                
+                
+                <a href="mailto:devtsai@outlook.com" title="devtsai@outlook.com"><i class="far fa-envelope-open" aria-hidden="true"></i></a> 
+                 
+            </li>
+            
+            
+            <li>发表日期： <abbr title="2019-05-16T00:00:00+08:00">
+                2019-05-16
+               </abbr></li>
+            <li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+            <li>若文章中存在事实上的错误，欢迎评论或与作者联系。</li>
+        </ul>
+</div>
+<style type="text/css">
+    .copyright{
+            margin-top:1em;
+            padding:1em;
+            border:1px solid #d3d3d3;
+            background-color:#DEEBF7;
+        }
+        
+        .copyright h4{
+            margin-top: 2px;
+            border-bottom:1px solid gray;
+            font-size:1.5em;
+            font-weight:bold;
+            color:#556677;
+        }
+        
+        .copyright ul{
+            padding-left:2em;
+            padding-right:2em;
+        }
+        
+        .copyright li{
+            color:#556677;
+        }
+</style>
+    
+        <hr>
+
+        
+        
+            
+            
+        
+            
+            
+                
+            
+                
+            
+        
+            
+            
+                
+            
+                
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+                
+            
+        
+            
+            
+                
+            
+        
+            
+            
+                
+            
+                
+            
+        
+            
+            
+                
+            
+        
+            
+            
+                
+            
+        
+        
+        <hr>
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2019/05/15/QuickMatrixTrans/">算法（二）：稀疏矩阵快速转置算法</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/05/16/MatrixMulti/">算法（三）：稀疏矩阵的乘法</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">评论</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2019/05/16/GList/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2019/05/16/GList/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//emous-github-io.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])');
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+            
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="mailto:devtsai@outlook.com" title="email"><i class="far fa-envelope-open" aria-hidden="true"></i></a>  
+            <a href="https://github.com/emous" title="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>  
+            <a href=" https://stackoverflow.com/users/9212741/anon" title="StackOverflow"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a>
+            <a href="https://Liang.blogspot.com/" title="Blogger"><i class="fab fa-blogger" aria-hidden="true"></i></a> 
+
+             
+             
+             
+              
+             
+            
+        </p>
+         <p class="text-center">
+            LiangLab 2022 |
+            Welcome You
+        </p>
+
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>

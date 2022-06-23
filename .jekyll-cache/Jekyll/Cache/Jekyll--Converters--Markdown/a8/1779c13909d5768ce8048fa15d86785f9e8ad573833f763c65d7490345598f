@@ -1,0 +1,166 @@
+I"4'<ul id="markdown-toc">
+  <li><a href="#题目" id="markdown-toc-题目">题目</a>    <ul>
+      <li><a href="#输入" id="markdown-toc-输入">输入</a></li>
+      <li><a href="#输出" id="markdown-toc-输出">输出</a></li>
+    </ul>
+  </li>
+  <li><a href="#分析与第一次尝试" id="markdown-toc-分析与第一次尝试">分析与第一次尝试</a></li>
+  <li><a href="#优化" id="markdown-toc-优化">优化</a></li>
+  <li><a href="#继续优化" id="markdown-toc-继续优化">继续优化</a>    <ul>
+      <li><a href="#如果有小正方形一样怎么办" id="markdown-toc-如果有小正方形一样怎么办">如果有小正方形一样怎么办？</a></li>
+      <li><a href="#重构" id="markdown-toc-重构">重构</a></li>
+    </ul>
+  </li>
+  <li><a href="#永无止境的优化" id="markdown-toc-永无止境的优化">永无止境的优化</a>    <ul>
+      <li><a href="#为什么还是超了" id="markdown-toc-为什么还是超了">为什么还是超了？</a></li>
+    </ul>
+  </li>
+  <li><a href="#实现" id="markdown-toc-实现">实现</a></li>
+</ul>
+
+<p>自从出国来读书就更加无聊了，所以开始刷题了。十分感谢这些题，让我从完全不知道DFS，到逐渐理解DFS的内涵，再到这题的优化。</p>
+
+<hr />
+
+<h2 id="题目"><a href="https://zoj.pintia.cn/problem-sets/91827364500/problems/91827364507">题目</a></h2>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/ZOJ1008/question.png" /></div>
+
+<center>Question Cube</center>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/ZOJ1008/solution.png" /></div>
+
+<center>Solution Cube</center>
+
+<ol>
+  <li>题目关于一个大的正方形。</li>
+  <li>大的正方形由n*n个小的正方形组成。</li>
+  <li>每个正方向被分成了4块三角形，三角形上有各自的数字。</li>
+  <li>问能否通过排列这n*n个小正方形，使得所有三角形上的数字和其正对着的三角形相同。</li>
+</ol>
+
+<h3 id="输入">输入</h3>
+
+<p>第1行，每行的小正方形数。</p>
+
+<p>接下来的n行中，4个数分别是正方形内部“上，右，下，左”的三角形的值，</p>
+
+<p>0 &lt;= n &lt;= 5, n 为0时表示输入结束了。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2
+5 9 1 4
+4 4 5 6
+6 8 5 4
+0 4 4 3
+2
+1 1 1 1
+2 2 2 2
+3 3 3 3
+4 4 4 4
+0
+</code></pre></div></div>
+
+<h3 id="输出">输出</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Game 1: Possible
+
+Game 2: Impossible
+</code></pre></div></div>
+
+<p>对于每个游戏先输出 “Game”，再输出空格，再输出第几个游戏，再输出”:”,再输出空格，再对应输出”Possible”或者”Impossible”。</p>
+
+<p>每个游戏之间需要有一个空行。</p>
+
+<h2 id="分析与第一次尝试">分析与第一次尝试</h2>
+
+<p><del>首先题目中没有说到正方形可以旋转，这降低了很多难度。</del></p>
+<ol>
+  <li>将图中的正方形逻辑是分成每个正方形自身，以及N个槽位。</li>
+  <li>对于每一个小正方形构成的大正方形虽然是一个二维的结构，但是因为二维数组去实现iterate和backtrack一方面容易越界，一方面在代码里需要多一层循环会大大降低可读性，而且难以去构思如何实现。所以把n*n(后文称N)个小正方形存到一位数组里，再用<code class="language-plaintext highlighter-rouge">%</code>操作去处理会方便很多。 （使用一位数组存储小正方形（实际上是二维数组，因为每个小正方形还有4个三角形值需要存储））</li>
+  <li>要探寻可能性，所以要得到所有的小正方形的排布情况（即N个数的全排列），会得到<code class="language-plaintext highlighter-rouge">N!</code>个排列。（找到全排列）</li>
+  <li>每个排列中的数 - 1为小正方形的编号，再对每个排列按照排列顺序将对应小正方放入第 1-N个槽中。（通过每个排列建立小正方形和位置的映射）</li>
+  <li>对每个排列的情况进行检验，检验每个正方形的上下左右的三角形是否和对应的三角形等值，如果出现全等，之后的便不再检验（可以通过Exception实现，也可以通过检测一些简单的<code class="language-plaintext highlighter-rouge">boolean flag</code>来判断）。</li>
+</ol>
+
+<div style="text-align: center;"><img style="height:700px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/ZOJ1008/Solution1.png" /></div>
+
+<p>虽然我轻松地用DFS把全排列的方法给写了出来，但是结果却很现实，要么是时间超要么是内存超（绝大多数时候是时间超）。而且，我还并不知道是超了，以至于我根本就不知道该如何改进。</p>
+
+<h2 id="优化">优化</h2>
+
+<p>除了改用原生数组实现容器操作，很快我就发现了一些可以优化的空间。</p>
+
+<ol>
+  <li>
+    <p>不需要比较上下左右，对于已经给出的特定排列左下开始，每个小正方形只需要比较上和右。</p>
+  </li>
+  <li>
+    <p>不需要把所有的排列都存起来，在已经全排列模块已经找到一个新的排列的情况下，可以直接检测。这样有两个好处：</p>
+
+    <ul>
+      <li>
+        <p>减少了排列的存储空间</p>
+      </li>
+      <li>
+        <p>如果成功，可以直接进行下一个游戏的检测，省去了继续计算全排列的时间。</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>在录入具体三角形的迭代中，可以计算不正方形见一共存在的等值的三角形的对字数，当这个数小于<code class="language-plaintext highlighter-rouge">2*n</code>对时，则一定不能完成游戏。 （在第一版优化中实现了该功能，因为“不同正方形”间的等值三角形比较难实现，代码又重构了，于是在后续的优化中就没有针对这个比较specific的情况写处理）</p>
+  </li>
+</ol>
+
+<div style="text-align: center;"><img style="height:700px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/ZOJ1008/Solution2.png" /></div>
+
+<p>然而还是超，超得莫名其妙，而且什么信息也不给。我并不知道我是超了一点，还是超了几个量级，于是我开始苦恼了。</p>
+
+<h2 id="继续优化">继续优化</h2>
+
+<p>我开始在网络上寻找一些点拨，随便浏览一两篇文章。看到<strong>压缩与分类</strong>，我像是突然间醒悟过来一样，其实这并不是“全排列”，而且绝大多数时候总是用全排列去处理问题是一种图方便的方式。因为，分类是在排列问题中总是可以做的一个步骤。</p>
+
+<h3 id="如果有小正方形一样怎么办">如果有小正方形一样怎么办？</h3>
+
+<p>当存在数目不等的一样的小正方形的时候，这个问题就从<code class="language-plaintext highlighter-rouge">1-N</code>的排列变成了<code class="language-plaintext highlighter-rouge">a个1，b个2，.., x个N</code>的排列，如果把他当作全排列去对待，那必然会在结果在出现的冗余的操作。</p>
+
+<h3 id="重构">重构</h3>
+
+<p>把原本的<code class="language-plaintext highlighter-rouge">正方形容器</code>拆分成<code class="language-plaintext highlighter-rouge">小正方形类型容器</code>和<code class="language-plaintext highlighter-rouge">小正方形类型数量容器</code>。全排列模块也相应的通过前面两个参数来控制迭代，从原本的 <code class="language-plaintext highlighter-rouge">(1-N) -&gt; (2-N)-&gt; ... -&gt; N</code>的单个参数控制的DFS变成<code class="language-plaintext highlighter-rouge">先同类型不同数量DFS</code>再<code class="language-plaintext highlighter-rouge">不同类型DFS</code>的二维迭代方式。</p>
+
+<div style="text-align: center;"><img style="height:700px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/ZOJ1008/Solution3.png" /></div>
+
+<p>然而，时间还是超了。</p>
+
+<h2 id="永无止境的优化">永无止境的优化</h2>
+
+<h3 id="为什么还是超了">为什么还是超了？</h3>
+
+<p><strong>因为嵌套的循环太多!</strong> 这是这直接原因，真正影响效率的从来都不是什么细枝末节的检查检查2个方向还是检查4个方向，整个程序最深的循环嵌套，才是需要被优化的地方。</p>
+
+<p>要么改变基础算法把嵌套层次减少，要么让不合规的操作<strong>尽快</strong>地continue或者break。</p>
+
+<p>然后再反思一下之前的程序设计：</p>
+
+<ol>
+  <li>
+    <p>循环最多的代码块很显然在排列的迭代</p>
+  </li>
+  <li>
+    <p>如果觉得通过降低基础的搜索算法来减少复杂度是困难的，那就应该尽快地continue或者break。（本质就是，检验操作应该在越浅层越好）</p>
+  </li>
+  <li>
+    <p><strong>之前的检验操作都是在一次排列完成后再操作的</strong>，我们能把他尽可能的提到浅层吗？</p>
+
+    <p>不需要，因为可以一边搜索排列的结果，一边计算当下排列的元素的合法性。只需要，把原先的比较<code class="language-plaintext highlighter-rouge">右，上</code>改成比较<code class="language-plaintext highlighter-rouge">左，下</code>就行了，每次比较的都是已经深搜出来的元素。这样，在发现部分排列不合适的时候，就可以直接进入下一次排列的搜索。</p>
+  </li>
+</ol>
+
+<div style="text-align: center;"><img style="height:700px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/ZOJ1008/Solution4.png" /></div>
+
+<p>于是，就Accepted啦！:D</p>
+
+<h2 id="实现">实现</h2>
+
+<script src="https://gist.github.com/eMous/5acf1e033378d3c685ccf829c29fa346.js"></script>
+
+:ET

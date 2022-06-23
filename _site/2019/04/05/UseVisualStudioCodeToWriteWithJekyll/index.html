@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>使用VSCode编写Jekyll</title>
+  <meta name="description"
+    content="到今天，我才终于能体会到为什么小甲鱼总会在他的教程里告诫所有初学者使用Notepad++进行编程。因为面对一个未知的事物，如果你的第一反应就是寻找捷径，那这意味着你将缺失一大部分由试错构建起的对其的宏观的认知。 当你有足够多的尝试，已把它的基本操作弄得明白后，才能对其构建起一个相对清晰的框架，对于之后发生问题可以...">
+  <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+
+  <link rel="stylesheet" href="/css/main.css ">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+  <link rel="canonical" href="http://localhost:4000/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/">
+  <link rel="alternate" type="application/rss+xml" title="LiangLab"
+    href="http://localhost:4000/feed.xml ">
+
+  
+  
+  <script>
+    // google analytics
+    (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-137230515-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+
+  
+  <script src="/demos/base/js/demo-made.js"></script>
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>使用VSCode编写Jekyll | LiangLab</title>
+<meta name="generator" content="Jekyll v4.2.2" />
+<meta property="og:title" content="使用VSCode编写Jekyll" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="自动化这件事总是后知后觉的。" />
+<meta property="og:description" content="自动化这件事总是后知后觉的。" />
+<link rel="canonical" href="http://localhost:4000/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/" />
+<meta property="og:url" content="http://localhost:4000/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/" />
+<meta property="og:site_name" content="LiangLab" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-04-05T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="使用VSCode编写Jekyll" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/","@type":"BlogPosting","description":"自动化这件事总是后知后觉的。","headline":"使用VSCode编写Jekyll","dateModified":"2019-04-05T00:00:00+08:00","datePublished":"2019-04-05T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+  <body style="background:white;">
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">LiangLab</a>
+
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>文章
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>博客
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>使用VSCode编写Jekyll</h1>
+        <div>
+            <hr>
+        </div>
+
+
+
+
+        <div class="label">
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-calendar"></i>2019-04-05
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" >
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#生产环境" title="Category: 生产环境" rel="category">生产环境</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+        <!--a href="/tag/#VSCode" title="Tag: VSCode" rel="tag">VSCode</a-->
+        <a href="/tag/#VSCode" title="Tag: VSCode" rel="tag">VSCode</a>&nbsp;
+    
+        <!--a href="/tag/#Jekyll" title="Tag: Jekyll" rel="tag">Jekyll</a-->
+        <a href="/tag/#Jekyll" title="Tag: Jekyll" rel="tag">Jekyll</a>&nbsp;
+    
+        <!--a href="/tag/#Chrome" title="Tag: Chrome" rel="tag">Chrome</a-->
+        <a href="/tag/#Chrome" title="Tag: Chrome" rel="tag">Chrome</a>
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#一开始我是如何做的" id="markdown-toc-一开始我是如何做的">一开始我是如何做的？</a></li>
+  <li><a href="#开始使用vs-code" id="markdown-toc-开始使用vs-code">开始使用VS Code</a>    <ul>
+      <li><a href="#不再需要powershell" id="markdown-toc-不再需要powershell">不再需要Powershell</a></li>
+      <li><a href="#版本控制符号" id="markdown-toc-版本控制符号">版本控制符号</a></li>
+      <li><a href="#项目内快速文件名搜索" id="markdown-toc-项目内快速文件名搜索">项目内快速文件名搜索</a></li>
+      <li><a href="#直接预览markdown" id="markdown-toc-直接预览markdown">直接预览Markdown</a></li>
+      <li><a href="#开发与调试" id="markdown-toc-开发与调试">开发与调试</a>        <ul>
+          <li><a href="#配置工作区" id="markdown-toc-配置工作区">配置工作区</a></li>
+          <li><a href="#开启jekyll" id="markdown-toc-开启jekyll">开启Jekyll</a></li>
+          <li><a href="#配置debug" id="markdown-toc-配置debug">配置Debug</a></li>
+          <li><a href="#开始调试" id="markdown-toc-开始调试">开始调试</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<div style="text-align: center;"><img style="height:400px;width:100%;" alt="" title="" src="/image/2019/04/05/make-up-brushes.svg" /></div>
+
+<p>到今天，我才终于能体会到为什么<a href="https://fishc.com.cn/">小甲鱼</a>总会在他的教程里告诫所有初学者使用<a href="https://en.wikipedia.org/wiki/Notepad%2B%2B">Notepad++</a>进行编程。因为面对一个未知的事物，<strong>如果你的第一反应就是寻找捷径，那这意味着你将缺失一大部分由试错构建起的对其的宏观的认知。</strong> 当你有足够多的尝试，已把它的基本操作弄得明白后，才能对其构建起一个相对清晰的框架，对于之后发生问题可以才能有一个准确的描述。</p>
+
+<p>这个试错的过程长短是因人而异的，至少对我来说，当我有意无意地察觉到我的问题解决过程存在模式之后。我便自然而然地想到工具，自动化方法，集成开发环境……</p>
+
+<hr />
+
+<h2 id="一开始我是如何做的">一开始我是如何做的？</h2>
+
+<p>最开始的时候，我使用的是<a href="https://en.wikipedia.org/wiki/Sublime_Text">Sublime Text</a>编辑博客样式与博客内容，配合<a href="https://en.wikipedia.org/wiki/PowerShell">Powershell</a>对Jekyll进行启停，通过Chrome浏览本地端地样式，最后使用<a href="https://www.sourcetreeapp.com/">SourceTree</a>将Jekyll推到Github Page再最后预览一遍。</p>
+
+<p>像这样:</p>
+
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_11-25-40.png" /></center>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_11-27-18.png" /></center>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_11-28-03.png" /></center>
+
+<p>现在回想起来确实是挺痛苦的回忆，特别是当时调试Feed的时候，一心想在每个单独的RSS post里增加样式以便他人在浏览时可以无需打开网站就看到相对美观的页面。然而，那些如<a href="https://feedly.com">Feedly</a>之类能显示单独item description的网站又无法提供localhost的feed嗅探服务，所以只能如是依次地修改在推到Github Page再等待Feedly更新，极其痛苦。然而最后实验证明，<strong>RSS里的内容如果有Style绝大多数是不会被解析的。</strong></p>
+
+<h2 id="开始使用vs-code">开始使用VS Code</h2>
+<p>因为我没有成为过专职的前端开发人员，所以我对VS Code其实也并不是太熟悉，下面的这些配置都是凭着操作和试错的模式得到的，也就是说<strong>因为频繁的操作和出错，我才想到有没有某些功能或插件，恰巧大多数都有。</strong></p>
+
+<h4 id="不再需要powershell">不再需要Powershell</h4>
+
+<p>使用VS Code将Jekyll目录打开后，编辑框下面的Terminal会自动打开一个Powershell并且进入当前目录。直接运行<code class="language-plaintext highlighter-rouge">jekyll s</code>，之后除非出现故障都无需理会。</p>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_11-43-50.png" /></center>
+
+<h4 id="版本控制符号">版本控制符号</h4>
+
+<p>和常用的IDE一样，如果打开的目录内有git仓库，VS Code也会通过git实时的呈现每个文件或文件夹版本变动的标志。<span style="color:green">绿色</span>是未追踪（新建），<span style="color:orange">黄色</span>是修改，<span style="color:red">红色</span>是删除。</p>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_11-50-20.png" /></center>
+
+<h4 id="项目内快速文件名搜索">项目内快速文件名搜索</h4>
+
+<p>在打开的文件夹或工作区内，直接输入英文字母即可定位并筛选出文件夹。</p>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_11-57-13.png" /></center>
+
+<h4 id="直接预览markdown">直接预览Markdown</h4>
+
+<p>配合<code class="language-plaintext highlighter-rouge">Markdown Preview Enhanced</code>插件，可以直接预览准备post的文件，美中不足的就是需要Jekyll模板编译的layout无法实时的预览。</p>
+
+<h3 id="开发与调试">开发与调试</h3>
+
+<p>甚至，当我在开发Jekyll-demos的时候都有尝试过使用VS Code作为主力编辑器。</p>
+
+<h4 id="配置工作区">配置工作区</h4>
+
+<p>网络上关于VS Code工作区的知识很少，在这一步我折腾了不少的时间。</p>
+
+<p>使用VS Code打开Jekyll文件夹，之后<code class="language-plaintext highlighter-rouge">File -&gt; Save workspace as</code>，将创建一个工作区的配置文件用于记录工作区包含哪些文件夹以及相关的配置。</p>
+
+<h4 id="开启jekyll">开启Jekyll</h4>
+
+<p>打开工作区，执行<code class="language-plaintext highlighter-rouge">Jekyll s</code>。</p>
+
+<h4 id="配置debug">配置Debug</h4>
+
+<p>进入<code class="language-plaintext highlighter-rouge">Debug</code>页面(第四个，<del>蜘蛛</del>样式)，<code class="language-plaintext highlighter-rouge">Add config(你的工作区)</code>。</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="err">//</span><span class="w"> </span><span class="err">Use</span><span class="w"> </span><span class="err">IntelliSense</span><span class="w"> </span><span class="err">to</span><span class="w"> </span><span class="err">learn</span><span class="w"> </span><span class="err">about</span><span class="w"> </span><span class="err">possible</span><span class="w"> </span><span class="err">attributes.</span><span class="w">
+    </span><span class="err">//</span><span class="w"> </span><span class="err">Hover</span><span class="w"> </span><span class="err">to</span><span class="w"> </span><span class="err">view</span><span class="w"> </span><span class="err">descriptions</span><span class="w"> </span><span class="err">of</span><span class="w"> </span><span class="err">existing</span><span class="w"> </span><span class="err">attributes.</span><span class="w">
+    </span><span class="err">//</span><span class="w"> </span><span class="err">For</span><span class="w"> </span><span class="err">more</span><span class="w"> </span><span class="err">information</span><span class="p">,</span><span class="w"> </span><span class="err">visit:</span><span class="w"> </span><span class="err">https://go.microsoft.com/fwlink/?linkid=</span><span class="mi">830387</span><span class="w">
+    </span><span class="nl">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.2.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"configurations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"chrome"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"request"</span><span class="p">:</span><span class="w"> </span><span class="s2">"launch"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Debug Jekyll"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:4000/"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"webRoot"</span><span class="p">:</span><span class="w"> </span><span class="s2">"${workspaceFolder}/_site"</span><span class="p">,</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+<h4 id="开始调试">开始调试</h4>
+
+<p>你可以直接在<code class="language-plaintext highlighter-rouge">_site/</code>下的<code class="language-plaintext highlighter-rouge">Html</code>和<code class="language-plaintext highlighter-rouge">Javascript</code>页面中设置断点和设置Watch，他将如期被断下。</p>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_12-16-09.png" /></center>
+
+<p>配合甚至Chrome的<code class="language-plaintext highlighter-rouge">SourceMap</code>，你可以在无需刷新页面的情况下修改<code class="language-plaintext highlighter-rouge">CSS</code>和<code class="language-plaintext highlighter-rouge">js</code>。</p>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_12-28-38.png" /></center>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_12-28-57.png" /></center>
+<center><img alt="" title="" src="/image/2019/04/05/Snipaste_2019-04-05_12-32-00.png" /></center>
+<p>绿色的部分圆点表示当前页面以及和文档中的文件Map起来，可以实时修改更新。</p>
+
+<p><span style="color:red"><strong>!但是</strong>，由于Jekyll先天的缺陷，这个修改过的文件并不是模板文件而是<code class="language-plaintext highlighter-rouge">_site</code>下的文件。所以都是无效的，我曾因为这个失误五六小时小时的代码全部在一次模板编译后消失不见。</span></p>
+
+<p>综上，VS Code提供了很多先进且快捷的特性，尤其是在撰写内容的时候基本只需要一个软件就可以完成所有工作。但是，VSCode的Debug功能Chrome响应实在太慢，最后我还是不得不放弃并转用WebStorm处理开发任务。</p>
+
+        </article>
+        <br>
+        <div class="copyright">
+        <h4>文档信息</h4>
+        <ul>
+            <li>作者: 
+                
+                    LiangLab
+                
+                
+                
+                <a href="mailto:devtsai@outlook.com" title="devtsai@outlook.com"><i class="far fa-envelope-open" aria-hidden="true"></i></a> 
+                 
+            </li>
+            
+            
+            <li>发表日期： <abbr title="2019-04-05T00:00:00+08:00">
+                2019-04-05
+               </abbr></li>
+            <li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+            <li>若文章中存在事实上的错误，欢迎评论或与作者联系。</li>
+        </ul>
+</div>
+<style type="text/css">
+    .copyright{
+            margin-top:1em;
+            padding:1em;
+            border:1px solid #d3d3d3;
+            background-color:#DEEBF7;
+        }
+        
+        .copyright h4{
+            margin-top: 2px;
+            border-bottom:1px solid gray;
+            font-size:1.5em;
+            font-weight:bold;
+            color:#556677;
+        }
+        
+        .copyright ul{
+            padding-left:2em;
+            padding-right:2em;
+        }
+        
+        .copyright li{
+            color:#556677;
+        }
+</style>
+    
+        <hr>
+
+        
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+        
+        <hr>
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2019/04/05/MyDemoTool/">Jekyll-demos为你展示demo助力</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/04/06/UseWebstormToWriteJekyll/">使用Webstorm编写Jekyll</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">评论</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//emous-github-io.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])');
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+            
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="mailto:devtsai@outlook.com" title="email"><i class="far fa-envelope-open" aria-hidden="true"></i></a>  
+            <a href="https://github.com/emous" title="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>  
+            <a href=" https://stackoverflow.com/users/9212741/anon" title="StackOverflow"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a>
+            <a href="https://Liang.blogspot.com/" title="Blogger"><i class="fab fa-blogger" aria-hidden="true"></i></a> 
+
+             
+             
+             
+              
+             
+            
+        </p>
+         <p class="text-center">
+            LiangLab 2022 |
+            Welcome You
+        </p>
+
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>

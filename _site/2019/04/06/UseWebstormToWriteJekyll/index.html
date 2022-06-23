@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>使用Webstorm编写Jekyll</title>
+  <meta name="description"
+    content="  WebstormWebstorm说到Webstorm，你会想到什么，是那个你分不清到底对应着哪个旗下软件的矢量Logo吗？如果我是你，我会很难回答这个问题。因为，我会想到PhpStorm，Pycharm，Clion甚至AndroidStudio，可是这并不是这个问题我想给出的答案，因为我始终都没办法自然而然地...">
+  <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+
+  <link rel="stylesheet" href="/css/main.css ">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+  <link rel="canonical" href="http://localhost:4000/2019/04/06/UseWebstormToWriteJekyll/">
+  <link rel="alternate" type="application/rss+xml" title="LiangLab"
+    href="http://localhost:4000/feed.xml ">
+
+  
+  
+  <script>
+    // google analytics
+    (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-137230515-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+
+  
+  <script src="/demos/base/js/demo-made.js"></script>
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>使用Webstorm编写Jekyll | LiangLab</title>
+<meta name="generator" content="Jekyll v4.2.2" />
+<meta property="og:title" content="使用Webstorm编写Jekyll" />
+<meta name="author" content="Anon" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="其实大家都半斤八两，但是我还是更偏爱这家。" />
+<meta property="og:description" content="其实大家都半斤八两，但是我还是更偏爱这家。" />
+<link rel="canonical" href="http://localhost:4000/2019/04/06/UseWebstormToWriteJekyll/" />
+<meta property="og:url" content="http://localhost:4000/2019/04/06/UseWebstormToWriteJekyll/" />
+<meta property="og:site_name" content="LiangLab" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-04-06T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="使用Webstorm编写Jekyll" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/04/06/UseWebstormToWriteJekyll/","author":{"@type":"Person","name":"Anon"},"@type":"BlogPosting","description":"其实大家都半斤八两，但是我还是更偏爱这家。","headline":"使用Webstorm编写Jekyll","dateModified":"2019-04-06T00:00:00+08:00","datePublished":"2019-04-06T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/04/06/UseWebstormToWriteJekyll/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+  <body style="background:white;">
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">LiangLab</a>
+
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>文章
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>博客
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>使用Webstorm编写Jekyll</h1>
+        <div>
+            <hr>
+        </div>
+
+
+
+
+        <div class="label">
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-calendar"></i>2019-04-06
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-user"></i>Anon
+                
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" >
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#生产环境" title="Category: 生产环境" rel="category">生产环境</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+        <!--a href="/tag/#Webstorm" title="Tag: Webstorm" rel="tag">Webstorm</a-->
+        <a href="/tag/#Webstorm" title="Tag: Webstorm" rel="tag">Webstorm</a>&nbsp;
+    
+        <!--a href="/tag/#Jekyll" title="Tag: Jekyll" rel="tag">Jekyll</a-->
+        <a href="/tag/#Jekyll" title="Tag: Jekyll" rel="tag">Jekyll</a>
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#webstorm" id="markdown-toc-webstorm">Webstorm</a></li>
+  <li><a href="#优点" id="markdown-toc-优点">优点</a></li>
+  <li><a href="#配置" id="markdown-toc-配置">配置</a></li>
+  <li><a href="#页面调试" id="markdown-toc-页面调试">页面调试</a>    <ul>
+      <li><a href="#专属调试技巧" id="markdown-toc-专属调试技巧">专属调试技巧</a></li>
+    </ul>
+  </li>
+  <li><a href="#注意事项" id="markdown-toc-注意事项">注意事项</a></li>
+</ul>
+
+<div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="/image/2019/04/06/Snipaste_2019-04-06_21-52-54.png" /></div>
+
+<h2 id="webstorm">Webstorm</h2>
+
+<p>说到Webstorm，你会想到什么，是那个你分不清到底对应着哪个旗下软件的矢量Logo吗？如果我是你，我会很难回答这个问题。因为，我会想到PhpStorm，Pycharm，Clion甚至Android
+Studio，可是这并不是这个问题我想给出的答案，因为我始终都没办法自然而然地想到<strong>JetBrains</strong>这个名字。可能是实在太难记，又或许是因为陷入了产品的光芒掩盖了品牌而产品间又几乎全是共性的矛盾之中。</p>
+
+<p>对我而言，因为之前大多都是开发<code class="language-plaintext highlighter-rouge">php-cli</code>的缘故，再加上之后做过一段时间<code class="language-plaintext highlighter-rouge">Yii</code>的前后端工作，所以用Phpstorm应该是所有IDE里最多的。相比之下，Webstorm也是当前才接触没有多长时间，虽然让我感觉它各种方面<abbr title="混乱的文件与（模板、补全）等功能的关联，插件功能和可编辑功能无法得到一致的表现。">欠缺</abbr>一点。但这并不能影响多少，相比之下JetBrains旗下的那股专注和克制仍然是让人无法拒绝的王牌。</p>
+
+<p>如果把如今的Visual Studio比作大型车床，满窗口都是功能按钮各种语言一应俱全，但是庞大且繁杂，假死崩溃无法彻底删除是常有的事情；而VS
+code，鉴于他有优秀的extension生态，姑且把它当作车床模型；最后JetBrains旗下的各IDE就是车床产出的各类刀具，它们比不上车床通用，但是对于自己方向上的问题恰好胜任而且绝不拖沓。</p>
+
+<hr />
+
+<h2 id="优点">优点</h2>
+
+<p>面对Jekyll的相关任务，Webstorm相比于VS code有几个明显的优点。</p>
+
+<dl>
+  <dt><del><strong>更全面的版本控制支持</strong></del></dt>
+  <dd>
+    <p><del>虽然它还是没有SourceTree那么优秀，比如没有<code class="language-plaintext highlighter-rouge">Git Flow</code>。但是
+你可以在右下角，轻松的切换分支和IDE内的快捷键Commit和Push，单单这两点我就很心满意足了。</del></p>
+  </dd>
+  <dt><strong>更安全的关联文件变动提醒</strong></dt>
+  <dd>
+    <p>Webstorm能人性化地探测并尽可能全地管理项目中地文件，哪怕是在文件中使用字符串关联的文件，在它被移除或更名之前，Webstorm都会把所有的关联文件列出让你确认。</p>
+  </dd>
+  <dt><strong>轻松配置、切换调试器</strong></dt>
+  <dd>
+    <p>毕竟VScode是编辑器出生，编译调试之类的功能不是自己的看家本领。然而Webstorm的定位本身就是Web开发IDE，这也就自然而然了，无需手动编写文件一切都是GUI实现。</p>
+  </dd>
+  <dt><strong>比VS Code Snippet功能更全的Live template</strong></dt>
+  <dd>
+    <p>VS Code的Snippet是和文件类型强耦合的，意味着每个文件只能跑自己类型的Snippet。然而，Live template则完全不同，虽说Webstorm自己的File Types也是乱七八糟，自定义的File Types不如狗，只能沦为Live template的Others类。但是，在基本的功能上Live template是比Snippet强大且灵活的，<strong>Webstorm提供Live template暴露给哪些语言（文件）类型的设置。</strong> 这意味着，js文件可以使用twig<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>类型的Live template，提供建议补全基本<code class="language-plaintext highlighter-rouge">Liquid</code>语句。</p>
+  </dd>
+</dl>
+
+<div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="/image/2019/04/06/Snipaste_2019-04-06_23-02-56.png" /></div>
+
+<dl>
+  <dt><strong>Markdown Navigation Plugin配合Language Injection</strong></dt>
+  <dd>
+    <p>Markdown Navigation是Webstorm下的Markdown增强插件，它能提供基本的Markdown功能。但是，他的Preview功能做的并不好，因为他无法识别基于项目绝对路径的图片，而且自动换行功能有时候也很烦人（这个可以通过开启soft wrap解决），这些都可以通过同屏左右两侧浏览器预览-写作实现。但是他配合Webstorm的Language Injection可以让Html,CSS,Javascript代码在md文件下编写变得无懈可击(比如使用img标签的时候，在其内部可以自动代码建议)。</p>
+  </dd>
+</dl>
+
+<h2 id="配置">配置</h2>
+
+<dl>
+  <dt><strong>给newpost配置Live Template</strong></dt>
+  <dd>
+    <p>加在<code class="language-plaintext highlighter-rouge">Markdown</code>组中，暴露给markdown文件使用，名为<code class="language-plaintext highlighter-rouge">.newpost</code>:其中<code class="language-plaintext highlighter-rouge">$fileName$</code>为已定义变量，<code class="language-plaintext highlighter-rouge">$date$</code>为日期函数值。</p>
+  </dd>
+</dl>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">id</span><span class="pi">:</span> <span class="s">$fileName$</span>
+<span class="na">author</span><span class="pi">:</span> <span class="s">Anon</span>
+<span class="na">layout</span><span class="pi">:</span> <span class="s">post</span>
+<span class="na">title</span><span class="pi">:</span> <span class="s">$title$</span>
+<span class="na">date</span><span class="pi">:</span> <span class="s">$date$</span>
+<span class="na">categories</span><span class="pi">:</span> <span class="s">$categories$</span>
+<span class="na">tags</span><span class="pi">:</span> <span class="s">$tags$</span>
+<span class="na">description</span><span class="pi">:</span> <span class="s">$description$</span>
+<span class="nn">---</span>
+
+
+<span class="err">*</span> <span class="s">content</span>
+<span class="pi">{:</span><span class="nv">toc</span><span class="pi">}</span>
+
+
+
+</code></pre></div></div>
+
+<dl>
+  <dt><strong>给img配置Live Template</strong></dt>
+  <dd>
+    <p>加在<code class="language-plaintext highlighter-rouge">Markdown</code>组中，暴露给markdown文件使用，名为<code class="language-plaintext highlighter-rouge">.img</code>,相比于普通的Markdown Image多了居中功能。</p>
+  </dd>
+</dl>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">&lt;div style="text-align</span><span class="err">:</span> <span class="s">center;"&gt;&lt;img style="height:$height$;width:$width$;" alt="$alt$" title="$title$" src="$src$"&gt;&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<dl>
+  <dt><strong>开放Twig Live Template给js和css</strong></dt>
+  <dd>
+    <p>当编辑主题或是调试功能代码的时候，需要在Javascript或CSS文件中用到Liquid，这时候这个功能就会很有用。</p>
+  </dd>
+</dl>
+
+<div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="/image/2019/04/06/Snipaste_2019-04-07_01-06-13.png" /></div>
+
+<h2 id="页面调试">页面调试</h2>
+
+<p>同样的，在页面调试方面Webstorm也有很强劲的表现。配合名为<code class="language-plaintext highlighter-rouge">JetBrain IDE Support Options</code>的Chrome插件，可以实现在未给Chrome配置Source Map的情况下完成热刷新。</p>
+
+<div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="/image/2019/04/06/Snipaste_2019-04-07_01-24-37.png" /></div>
+
+<h3 id="专属调试技巧">专属调试技巧</h3>
+
+<p>在Webstorm中你甚至可以直接在项目目录的Javascript文件中打断点，他一样会Debugger住，然后让你修改，（我估计这只是单纯检查文件名造成的Bug），哪怕这是一个满是Liquid的文件（如果是这种情况它会断到最后一行）。</p>
+
+<h2 id="注意事项">注意事项</h2>
+
+<ul>
+  <li>
+    <p>如果你下载了Twig插件，你可能会发现在.Twig的文本中竟然没有任何补全信息。而且你在设置中找不到任何相关的信息，然而其他的所有文件（其实也并不是）都有补全，除了纯Text文件。这个时候，你或许要怀疑它的插件有Bug从而让系统误认为是Text文件了，其实这并不是这样的，因为他是静态模板文件，这就意味着文件中的<code class="language-plaintext highlighter-rouge">标签</code>外区域是大量的纯文本输出内容，因此不适宜提供代码提示，你可以手动唤醒他们<code class="language-plaintext highlighter-rouge">Ctrl + J</code>或者<code class="language-plaintext highlighter-rouge">Ctrl + Space</code>。至于为什么可以通过插件做这种拒绝弹出提示的操作，而在设置中无法做到，就不得而知了，所以我觉得Webstorm其实也挺混乱的。</p>
+  </li>
+  <li>Chrome自带的HMR只支持Javascript和CSS两种，就是说在Webstorm里修改Javascript或者scss模板都能直接在Chrome里响应（如果基于Chrome的HMR，虽然它也可能随时需要再激活一次，但是它确实更精确也更可靠，除了不能热更新Html文件意外）。但是如果要连同Html一起更新则需要Live Edit（对于CSS的刷新有一些文件有用而一些则没响应，所以需要配合Chrome的HMR一起使用，特别是debug选项没有配置的文件。），但是Webstorm自带的Synchronization功能又有一定的问题，如果修改模板文件，它并不能自动的检测到<code class="language-plaintext highlighter-rouge">_site</code>文件夹的变动并同步给Chrome里的插件。这个时候可以使用手动快捷键<code class="language-plaintext highlighter-rouge">Ctrl+Alt+Y</code>或者将鼠标单击到别的应用程序窗口再回到Webstorm再或者将<code class="language-plaintext highlighter-rouge">_site</code>下的文件一起打开在Editor的一个Tab中。
+  <strong>所以最后得出的结论就是：写post就用Webstorm一边写，一边单击切换Chrome可以实时预览；修改样式就直接用Chrome的Workspace可以实时预览；修改Javascript则用Webstorm可以直接在模板文件处打断点。</strong></li>
+  <li>很奇怪的，不知道是什么原因，在Webstorm中的文件其实是自动保存的。因为哪怕不点击<code class="language-plaintext highlighter-rouge">Ctrl+S(Save ALL)</code>一样是可以在VS Code里看到文件的变动的，但是不点击<code class="language-plaintext highlighter-rouge">Save ALL</code>jekyll的watcher就无法检测到文件的变动。</li>
+</ul>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>Webstorm插件,有基本的Liquid语法高亮。 <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <br>
+        <div class="copyright">
+        <h4>文档信息</h4>
+        <ul>
+            <li>作者: 
+                
+                    Anon
+                
+                
+                
+                <a href="mailto:devtsai@outlook.com" title="devtsai@outlook.com"><i class="far fa-envelope-open" aria-hidden="true"></i></a> 
+                 
+            </li>
+            
+            
+            <li>发表日期： <abbr title="2019-04-06T00:00:00+08:00">
+                2019-04-06
+               </abbr></li>
+            <li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+            <li>若文章中存在事实上的错误，欢迎评论或与作者联系。</li>
+        </ul>
+</div>
+<style type="text/css">
+    .copyright{
+            margin-top:1em;
+            padding:1em;
+            border:1px solid #d3d3d3;
+            background-color:#DEEBF7;
+        }
+        
+        .copyright h4{
+            margin-top: 2px;
+            border-bottom:1px solid gray;
+            font-size:1.5em;
+            font-weight:bold;
+            color:#556677;
+        }
+        
+        .copyright ul{
+            padding-left:2em;
+            padding-right:2em;
+        }
+        
+        .copyright li{
+            color:#556677;
+        }
+</style>
+    
+        <hr>
+
+        
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+            
+        
+        
+        <hr>
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2019/04/05/UseVisualStudioCodeToWriteWithJekyll/">使用VSCode编写Jekyll</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/04/10/DataStructure_SeqList_C++/">数据结构（一）：顺序表的C++实现</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">评论</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2019/04/06/UseWebstormToWriteJekyll/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2019/04/06/UseWebstormToWriteJekyll/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//emous-github-io.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])');
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+            
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="mailto:devtsai@outlook.com" title="email"><i class="far fa-envelope-open" aria-hidden="true"></i></a>  
+            <a href="https://github.com/emous" title="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>  
+            <a href=" https://stackoverflow.com/users/9212741/anon" title="StackOverflow"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a>
+            <a href="https://Liang.blogspot.com/" title="Blogger"><i class="fab fa-blogger" aria-hidden="true"></i></a> 
+
+             
+             
+             
+              
+             
+            
+        </p>
+         <p class="text-center">
+            LiangLab 2022 |
+            Welcome You
+        </p>
+
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>

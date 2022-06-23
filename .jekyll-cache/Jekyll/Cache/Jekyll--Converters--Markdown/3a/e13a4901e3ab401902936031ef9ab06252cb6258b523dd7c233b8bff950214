@@ -1,0 +1,17 @@
+I"y<ul id="markdown-toc">
+  <li><a href="#webstorm" id="markdown-toc-webstorm">Webstorm</a></li>
+</ul>
+
+<div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="/image/2019/04/06/Snipaste_2019-04-06_21-52-54.png" /></div>
+
+<h2 id="webstorm">Webstorm</h2>
+
+<p>说到Webstorm，你会想到什么，是那个你分不清到底对应着哪个旗下软件的矢量Logo吗？如果我是你，我会很难回答这个问题。因为，我会想到PhpStorm，Pycharm，Clion甚至Android
+Studio，可是这并不是这个问题我想给出的答案，因为我始终都没办法自然而然地想到<strong>JetBrains</strong>这个名字。可能是实在太难记，又或许是因为陷入了产品的光芒掩盖了品牌而产品间又几乎全是共性的矛盾之中。</p>
+
+<p>对我而言，因为之前大多都是开发<code class="language-plaintext highlighter-rouge">php-cli</code>的缘故，再加上之后做过一段时间<code class="language-plaintext highlighter-rouge">Yii</code>的前后端工作，所以用Phpstorm应该是所有IDE里最多的。相比之下，Webstorm也是当前才接触没有多长时间，虽然让我感觉它各种方面<abbr title="混乱的文件与（模板、补全）等功能的关联，插件功能和可编辑功能无法得到一致的表现。">欠缺</abbr>一点。但这并不能影响多少，相比之下JetBrains旗下的那股专注和克制仍然是让人无法拒绝的王牌。</p>
+
+<p>如果把如今的Visual Studio比作大型车床，满窗口都是功能按钮各种语言一应俱全，但是庞大且繁杂，假死崩溃无法彻底删除是常有的事情；而VS
+code，鉴于他有优秀的extension生态，姑且把它当作车床模型；最后JetBrains旗下的各IDE就是车床产出的各类刀具，它们比不上车床通用，但是对于自己方向上的问题恰好胜任而且绝不拖沓。</p>
+
+:ET

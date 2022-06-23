@@ -1,0 +1,561 @@
+I"��<ul id="markdown-toc">
+  <li><a href="#channel机制" id="markdown-toc-channel机制">Channel机制</a>    <ul>
+      <li><a href="#新建打开一个channel" id="markdown-toc-新建打开一个channel">（新建）打开一个Channel</a></li>
+      <li><a href="#传输数据" id="markdown-toc-传输数据">传输数据</a></li>
+      <li><a href="#关闭channel" id="markdown-toc-关闭channel">关闭Channel</a></li>
+      <li><a href="#明确channel信息请求" id="markdown-toc-明确channel信息请求">明确Channel信息请求</a></li>
+    </ul>
+  </li>
+  <li><a href="#交互session" id="markdown-toc-交互session">交互Session</a>    <ul>
+      <li><a href="#打开session-channel" id="markdown-toc-打开session-channel">打开Session Channel</a></li>
+      <li><a href="#请求一个虚拟终端" id="markdown-toc-请求一个虚拟终端">请求一个虚拟终端</a></li>
+      <li><a href="#x11转发" id="markdown-toc-x11转发">X11转发</a></li>
+      <li><a href="#传递环境变量" id="markdown-toc-传递环境变量">传递环境变量</a></li>
+      <li><a href="#启动一个shell或者一个命令" id="markdown-toc-启动一个shell或者一个命令">启动一个Shell或者一个命令</a></li>
+      <li><a href="#窗口调整消息" id="markdown-toc-窗口调整消息">窗口调整消息</a></li>
+      <li><a href="#本地流控" id="markdown-toc-本地流控">本地流控</a></li>
+      <li><a href="#信号" id="markdown-toc-信号">信号</a></li>
+      <li><a href="#返回退出状态" id="markdown-toc-返回退出状态">返回退出状态</a></li>
+    </ul>
+  </li>
+  <li><a href="#tcpip-端口转发" id="markdown-toc-tcpip-端口转发">TCP/IP 端口转发</a>    <ul>
+      <li><a href="#全局请求" id="markdown-toc-全局请求">全局请求</a></li>
+      <li><a href="#请求端口转发" id="markdown-toc-请求端口转发">请求端口转发</a></li>
+      <li><a href="#tcpip转发channel" id="markdown-toc-tcpip转发channel">TCP/IP转发Channel</a></li>
+    </ul>
+  </li>
+  <li><a href="#终端模式的编码" id="markdown-toc-终端模式的编码">终端模式的编码</a></li>
+  <li><a href="#预定义名称" id="markdown-toc-预定义名称">预定义名称</a>    <ul>
+      <li><a href="#连接协议channel类型" id="markdown-toc-连接协议channel类型">连接协议Channel类型</a></li>
+      <li><a href="#连接协议全局请求名" id="markdown-toc-连接协议全局请求名">连接协议全局请求名</a></li>
+      <li><a href="#连接协议channel明细请求名" id="markdown-toc-连接协议channel明细请求名">连接协议Channel明细请求名</a></li>
+      <li><a href="#连接协议子系统名" id="markdown-toc-连接协议子系统名">连接协议子系统名</a></li>
+    </ul>
+  </li>
+  <li><a href="#reference" id="markdown-toc-reference">Reference</a></li>
+</ul>
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/SSH_logo.png" /></div>
+
+<p>在认证完毕后，客户端和服务端之间将使用SSH连接协议进行实际的任务操作，包括<strong>开启交互式的登录会话</strong>、<strong>远程命令调用</strong>、<strong>TCP转发</strong>、<strong>X11转发</strong>等。在传输层协议之上，启用连接协议的方式就是请求一个<strong>service name</strong>为<strong>ssh-connection</strong>服务。</p>
+
+<hr />
+
+<h2 id="channel机制">Channel机制</h2>
+
+<p>连接协议里的每个实际应用都是Channel，各方都有可能打开Channel，大量的Channel复用同一个Connection（我认为这里指的Connection应该是上文说的ssh-connection service）。一个Channel被双方用自己的数字标识，所以每端不同的数字可能指向的并不是相同的Channel。其他任何和Channel相关的消息都会包含对端的Channel标识。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sender:number1    -&gt;    ()=========================()    &lt;-    number2:receiver
+</code></pre></div></div>
+<p>Channel是被<code class="language-plaintext highlighter-rouge">流控</code>的，在被告知<code class="language-plaintext highlighter-rouge">窗口</code>可用之前没有数据可以在Channel里传输。</p>
+
+<h3 id="新建打开一个channel">（新建）打开一个Channel</h3>
+
+<p>当任意一端想要新建一个Channel时，它首先要给Channel分配一个本端的数字标识。然后将下面的消息发送给对端，这个消息包括了本（发送）端标识、初始化窗口大小等。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_OPEN
+      string    channel type in US-ASCII only
+      uint32    sender channel
+      uint32    initial window size
+      uint32    maximum packet size
+      ....      channel type specific data follows
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">channel type</code>是一个名字，符合SSH rfc命名规范，注册命名(<code class="language-plaintext highlighter-rouge">名称</code>)、扩展命名（<code class="language-plaintext highlighter-rouge">名称@域名</code>）；<code class="language-plaintext highlighter-rouge">sender channel</code>是本地的标识；<code class="language-plaintext highlighter-rouge">initial window size</code>则明确了<strong>在不调整窗口大小的情况下，对方一共可以发送多少字节的数据给（这个消息的）发送者</strong>；<code class="language-plaintext highlighter-rouge">maximum packet size</code>表示对方发给 <strong>(这个消息的)发送者</strong> 的单次的packet的最大值是多少。</p>
+
+<p><strong>为什么要设置window size和maximum packet size</strong>，我的理解是，有一些老旧的慢速设备IO带宽很低，所以如果大量的数据涌进来会导致缓冲区溢出。</p>
+
+<p>对端收到消息后需要作出决定是否同意开启一个Channel，使用SSH_MSG_CHANNEL_OPEN_CONFIRMATION或SSH_MSG_CHANNEL_OPEN_FAILURE响应消息。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_OPEN_CONFIRMATION
+      uint32    recipient channel
+      uint32    sender channel
+      uint32    initial window size
+      uint32    maximum packet size
+      ....      channel type specific data follows
+</code></pre></div></div>
+<p>其中<code class="language-plaintext highlighter-rouge">recipient channel</code>为<strong>请求开启Channel端</strong>的本地Channel标识，<code class="language-plaintext highlighter-rouge">sender channel</code>则为<strong>当前消息发送方</strong>的本地Channel标识，其他的数据都是描述<strong>当前消息发送方</strong>的。或者发送打开失败的消息SSH_MSG_CHANNEL_OPEN_FAILURE。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_OPEN_FAILURE
+      uint32    recipient channel
+      uint32    reason code
+      string    description in ISO-10646 UTF-8 encoding [RFC3629]
+      string    language tag [RFC3066]
+</code></pre></div></div>
+<p>比如<strong>被请求开启Channel的一方</strong>不支持标注的<code class="language-plaintext highlighter-rouge">channel type</code>，那它将简单地回应SSH_MSG_CHANNEL_OPEN_FAILURE。请求方则或许需要显示<code class="language-plaintext highlighter-rouge">description</code>给用户。下面是一些预定义的错误码：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>            SSH_OPEN_ADMINISTRATIVELY_PROHIBITED          1
+            SSH_OPEN_CONNECT_FAILED                       2
+            SSH_OPEN_UNKNOWN_CHANNEL_TYPE                 3
+            SSH_OPEN_RESOURCE_SHORTAGE                    4
+</code></pre></div></div>
+<p>错误码0x00000005 - 0xFDFFFFFF将按照<code class="language-plaintext highlighter-rouge">IETF CONSENSUS</code>的方式分配，0xFE000000 - 0xFFFFFFFF则留给个人使用。虽然IANA没有关于0xFE000000 - 0xFFFFFFFF的控制权，但是还是将他约定成2部分使用：</p>
+
+<ul>
+  <li>
+    <p>0xFE000000 - 0xFEFFFFFF被用在本地分配的Channel上，比如channel type为”example_session@example.com”(带有@符号)的Channel打开失败，那么错误码应该使用由IANA分配的部分（ 0x00000001 - 0xFDFFFFFF）或者本地分配相关的部分（0xFE000000 - 0xFEFFFFFF）。</p>
+
+    <p>比如服务器不认识这个channel type，哪怕这个type是本地定义（包含@）的，也必须使用0x00000003错误码。然而如果，服务器认识这个错误码但是无法打开，则应该使用0xFE000000 - 0xFEFFFFFF其中的一个错误码。总的来说，参与者应该首先尝试使用IANA分配的错误码，然后在使用它们自定义的原因。</p>
+  </li>
+  <li>
+    <p>对于从0xFF开始的部分，不做限制或建议。在这个范围内的每一个值，都不被期望有任何实际操作交互性，本质上说它们是为实验目的而预留的。</p>
+  </li>
+</ul>
+
+<h3 id="传输数据">传输数据</h3>
+
+<p>上文描述了窗口大小可以用来限制另一方发送的数据量，同时协议规定双方都可以通过下面的消息对窗口作出调整。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_WINDOW_ADJUST
+      uint32    recipient channel
+      uint32    bytes to add
+</code></pre></div></div>
+<p>接收方接收到这个消息以后，接收方可以根据这个给定的数增加窗口的大小，不论如何窗口最大为2^32-1字节。具体的数据，则通过下面的消息发送。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_DATA
+      uint32    recipient channel
+      string    data
+</code></pre></div></div>
+<p>单次可以发送数据的最大量取决于<strong>对方当前窗口尺寸</strong>和<strong>对方允许接受的最大packet值</strong>的最小值。对方每接受一个消息，窗口都会相应减少。规范期望实现可以对传输层packet size做出限制（任何关于接受数据的限制必须大于等于32768字节）。所以在连接层协议：</p>
+
+<ul>
+  <li>
+    <p>不准将可接受的maximum packet size设置成大于传输层能接受的最大值。</p>
+  </li>
+  <li>
+    <p>不准生成超过传输层能发送的最大值，哪怕对方的连接协议能接受这么大的packet。</p>
+  </li>
+</ul>
+
+<p>同时，协议提供了一些传递额外数据（比如stderr数据）的方法。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_EXTENDED_DATA
+      uint32    recipient channel
+      uint32    data_type_code
+      string    data
+</code></pre></div></div>
+<p>目前标准定义的data_type_code类型有：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>             SSH_EXTENDED_DATA_STDERR               1
+</code></pre></div></div>
+<p>同时这个data_type_code的值的分发规定也与上文的channel type类似，分为IANA部分和私人使用部分。</p>
+
+<h3 id="关闭channel">关闭Channel</h3>
+
+<p>当任意一方不在往Channel发送更多数据的时候，它应该发送一个SSH_MSG_CHANNEL_EOF消息。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_EOF
+      uint32    recipient channel
+</code></pre></div></div>
+
+<p>这个消息不会有明确的响应，但是它依旧应该被发送给对方不论对方是谁。需要注意的是，发送完这个消息后，Channel依旧是打开着的（只不过自己这一边不再发数据了），从另一个方向上还是可能过来更多的数据。这个消息并不会消耗窗口大小，即使窗口已经不可以。</p>
+
+<p>当任意一方希望结束Channel时，则应该发送SSH_MSG_CHANNEL_CLOSE。另一方必须也发送SSH_MSG_CHANNEL_CLOSE，除非它已经发送过SSH_MSG_CHANNEL_CLOSE（网络延迟）了。当一方<strong>既发送了又接收到</strong>SSH_MSG_CHANNEL_CLOSE消息，Channel就被关闭了，相关的资源可以被清理，本地的Channel number可以在下次打开Channel的时候重用。任意一方都可以直接发送SSH_MSG_CHANNEL_CLOSE而不需要与现发送SSH_MSG_CHANNEL_EOF。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_CLOSE
+      uint32    recipient channel
+</code></pre></div></div>
+<p>同样的，这个消息不需要消耗窗口大小。</p>
+
+<h3 id="明确channel信息请求">明确Channel信息请求</h3>
+
+<p>许多的channel type包含关于该channel type的更详细的扩充设定。比如说，为一个交互session请求一个虚拟终端。所有的明确Channel信息请求都是如下格式。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    request type in US-ASCII characters only
+      boolean   want reply
+      ....      type-specific data follows
+</code></pre></div></div>
+<p>如果<code class="language-plaintext highlighter-rouge">want reply</code>被设置成FALSE，不会有响应被回复给请求端。否则，响应可能包括SSH_MSG_CHANNEL_SUCCESS、SSH_MSG_CHANNEL_FAILURE或者要求继续提供信息的消息。如果接收端不认识或不支持这个扩充的明细，则返回SSH_MSG_CHANNEL_FAILURE。</p>
+
+<p>这个消息也不消耗窗口大小，<code class="language-plaintext highlighter-rouge">request type</code>是自定义的。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_SUCCESS
+      uint32    recipient channel
+
+
+      byte      SSH_MSG_CHANNEL_FAILURE
+      uint32    recipient channel
+</code></pre></div></div>
+<p>上述两个消息也不消耗窗口大小。</p>
+
+<h2 id="交互session">交互Session</h2>
+
+<p><strong>一个Session就是一个远程的程序的执行</strong>。这个程序或许是shell、应用程序、系统调用或者内建的子系统。它可能没有绑定到虚拟终端上，又或者有或没有涉及到X11转发。同时间，可以有多个Session正在被运行。</p>
+
+<h3 id="打开session-channel">打开Session Channel</h3>
+
+<p>使用如下消息打开一个Session Channel，客户端应该拒绝来自服务端的打开Session Channel的请求以避免被攻击。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_OPEN
+      string    "session"
+      uint32    sender channel
+      uint32    initial window size
+      uint32    maximum packet size
+</code></pre></div></div>
+
+<h3 id="请求一个虚拟终端">请求一个虚拟终端</h3>
+
+<p>通过如下消息可以让服务器为Session分配一个虚拟终端，character/row的优先级相比于pixels更高，除非他们被设置成0。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "pty-req"
+      boolean   want_reply
+      string    TERM environment variable value (e.g., vt100)
+      uint32    terminal width, characters (e.g., 80)
+      uint32    terminal height, rows (e.g., 24)
+      uint32    terminal width, pixels (e.g., 640)
+      uint32    terminal height, pixels (e.g., 480)
+      string    encoded terminal modes
+</code></pre></div></div>
+<p>客户端应该拒绝来自服务端的虚拟终端明确信息请求以避免被攻击。</p>
+
+<h3 id="x11转发">X11转发</h3>
+
+<p>通过如下消息可以为Session请求X11转发。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "x11-req"
+      boolean   want reply
+      boolean   single connection
+      string    x11 authentication protocol
+      string    x11 authentication cookie
+      uint32    x11 screen number
+</code></pre></div></div>
+<p>协议推荐将<code class="language-plaintext highlighter-rouge">x11 authentication cookie</code>发送成一个虚假且随机的cookie，知道连接消息被接收后它将被检验并替换成真实的cookie。当session channel被关闭的时候，X11转发也应该停止，但是已经打开的转发不应该自动被关闭。如果<code class="language-plaintext highlighter-rouge">single connection</code>被设置为TRUE，那么只有一个连接被转发。</p>
+
+<p>这个消息对应的操作是： 客户端向服务器发出请求，服务器在本地新建N个（如果single connection不为0）X11服务器（只是纯粹的监听6000+server自定义offset（openssh为10）的TCP端口，创建相应的DISPLAY环境变量）。</p>
+
+<p>在remote session上执行<code class="language-plaintext highlighter-rouge">gedit &amp;</code>时，<code class="language-plaintext highlighter-rouge">gedit</code>是符合X11协议的客户端，所以它会检测环境变量发现存在display，就和本地的6010端口建立连接。服务器的伪x11服务器socket侦测到连接就很向客户端发起SSH_MSG_CHANNEL_OPEN x11 Channel的请求。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_OPEN
+      string    "x11"
+      uint32    sender channel
+      uint32    initial window size
+      uint32    maximum packet size
+      string    originator address (e.g., "192.168.7.38")
+      uint32    originator port
+</code></pre></div></div>
+<p>客户端收到请求后再与本地的X11建立连接，这样一个X11转发的通道就完成了（我并没有在openssh的源码中发现客户端是如何使用originator address数据的）。</p>
+
+<h3 id="传递环境变量">传递环境变量</h3>
+
+<p>在shell或command被开始时之后，或许有环境变量需要被传递过去。然而在特权程序里不受控制的设置环境变量是一个很有风险的事情，所以规范推荐实现维护一个允许被设置的环境变量列表或者只有当sshd丢弃权限后设置环境变量。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "env"
+      boolean   want reply
+      string    variable name
+      string    variable value
+</code></pre></div></div>
+
+<h3 id="启动一个shell或者一个命令">启动一个Shell或者一个命令</h3>
+
+<p>一旦一个Session被设置完毕，在远端就会有一个程序被启动。这个程序可以是一个Shell，也可以时一个应用程序或者是一个有着独立域名的子系统。下面的请求每个Channel（Session）只允许设置一个。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "shell"
+      boolean   want reply
+
+      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "exec"
+      boolean   want reply
+      string    command
+
+      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "subsystem"
+      boolean   want reply
+      string    subsystem name
+</code></pre></div></div>
+
+<h3 id="窗口调整消息">窗口调整消息</h3>
+
+<p>当客户端的终端窗口大小被改变时，或许需要发送这个消息给服务器。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "window-change"
+      boolean   FALSE
+      uint32    terminal width, columns
+      uint32    terminal height, rows
+      uint32    terminal width, pixels
+      uint32    terminal height, pixels
+</code></pre></div></div>
+<p>这个消息没有响应。</p>
+
+<h3 id="本地流控">本地流控</h3>
+
+<p>在很多系统中，这是否可行取决于伪终端是否使用<code class="language-plaintext highlighter-rouge">control-S/control-Q</code>进行流控。如果正在使用，那么在客户端就应该有一个流控的功能给服务端的响应提速，这还是取决于服务端设备的（系统）实现。下面的消息可以让服务器通知客户端是否可以提供流控的功能，如果可以的话客户端则可以使用<code class="language-plaintext highlighter-rouge">control-S/control-Q</code>进行流控。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "xon-xoff"
+      boolean   FALSE
+      boolean   client can do
+</code></pre></div></div>
+<p>这个消息没有响应。</p>
+
+<h3 id="信号">信号</h3>
+
+<p>一个信号可以被传输给远端的程序或服务使用下面的消息。有一些系统可能没有实现信号，所以那些系统下的服务端应该忽略这个消息。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "signal"
+      boolean   FALSE
+      string    signal name (without the "SIG" prefix)
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">signal name</code>在下面的预定义名称中有描述。</p>
+
+<h3 id="返回退出状态">返回退出状态</h3>
+
+<p>当在远端的命令结束时，下面的消息可以用来传递其退出的状态码。发送或收到这个消息后Channel将被关闭。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "exit-status"
+      boolean   FALSE
+      uint32    exit_status
+</code></pre></div></div>
+<p>同时远端的程序也可能因为一个信号而被迫关闭(<code class="language-plaintext highlighter-rouge">exit_statue</code> 为0的时候为正常关闭)，这个情况下下面的消息将被发送。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_REQUEST
+      uint32    recipient channel
+      string    "exit-signal"
+      boolean   FALSE
+      string    signal name (without the "SIG" prefix)
+      boolean   core dumped
+      string    error message in ISO-10646 UTF-8 encoding
+      string    language tag [RFC3066]
+</code></pre></div></div>
+
+<h2 id="tcpip-端口转发">TCP/IP 端口转发</h2>
+
+<h3 id="全局请求">全局请求</h3>
+
+<p>协议规定了许多种可以影响远端全局而独立于任何Channel的请求，一个例子就是唯一个特定的端口请求TCP/IP转发。双方中的任意一方都有可能在任意时间发送全局请求，接收方必须做出合理的响应，其格式如下。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_GLOBAL_REQUEST
+      string    request name in US-ASCII only
+      boolean   want reply
+      ....      request-specific data follows
+</code></pre></div></div>
+<p>响应如下，通常不包含<code class="language-plaintext highlighter-rouge">response specific data</code>这一栏。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_REQUEST_SUCCESS
+      ....     response specific data
+</code></pre></div></div>
+<p>协议规定，SSH_MSG_GLOBAL_REQUESTS的响应顺序必须如其发送顺序一致。有明确指示Channel的请求消息才可以不按顺序发送。</p>
+<h3 id="请求端口转发">请求端口转发</h3>
+
+<p>如果其中一方期望<strong>一个发往对方端口的数据可以转发到本地的端口</strong>，那么他可以发送如下的请求。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_GLOBAL_REQUEST
+      string    "tcpip-forward"
+      boolean   want reply
+      string    address to bind (e.g., "0.0.0.0")
+      uint32    port number to bind
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">address to bind</code>和<code class="language-plaintext highlighter-rouge">port number to bind</code>用来标明哪个具体的IP地址（或域名）和端口用于转发（另一端端开启对哪个IP和端口的监听并转发到本地），<code class="language-plaintext highlighter-rouge">address to bind</code>满足以下的语法规则。</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">""</code>表示接受所有的被SSH实现方支持的协议。</li>
+  <li><code class="language-plaintext highlighter-rouge">"0.0.0.0"</code>表示监听所有IPv4端口。</li>
+  <li><code class="language-plaintext highlighter-rouge">"::"</code>表示监听所有IPv6端口。</li>
+  <li><code class="language-plaintext highlighter-rouge">"localhost"</code>表示在回环网卡上监听所有被SSH实现支持的协议。</li>
+  <li><code class="language-plaintext highlighter-rouge">"127.0.0.1"</code>和<code class="language-plaintext highlighter-rouge">"::1"</code>分别表示监听IPv4和IPv6的回环网卡。</li>
+</ul>
+
+<p>客户端应该拒绝这个消息，这个消息一般只允许客户端发送。同时如果客户端传递的<code class="language-plaintext highlighter-rouge">port number</code>是0，且它设置了<code class="language-plaintext highlighter-rouge">want reply</code>为TRUE，那么服务器应该分配下一个可用的<code class="language-plaintext highlighter-rouge">非权限端口</code>，并且在响应中告知客户端。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte     SSH_MSG_REQUEST_SUCCESS
+      uint32   port that was bound on the server
+</code></pre></div></div>
+<p>端口转发可以被下面的消息取消，一个channel open请求可能会直到接收到该消息的响应后收到。这个消息只有客户端可以发送。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_GLOBAL_REQUEST
+      string    "cancel-tcpip-forward"
+      boolean   want reply
+      string    address_to_bind (e.g., "127.0.0.1")
+      uint32    port number to bind
+</code></pre></div></div>
+
+<h3 id="tcpip转发channel">TCP/IP转发Channel</h3>
+
+<p>当服务端被设置需要监听并转发的端口收到了外部的连接时，服务端将发送下面的消息请求客户端开启一个TCP/IP转发Channel。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_OPEN
+      string    "forwarded-tcpip"
+      uint32    sender channel
+      uint32    initial window size
+      uint32    maximum packet size
+      string    address that was connected （外部连接到服务器监听地址的的IP地址）
+      uint32    port that was connected 
+      string    originator IP address (这个应该是服务端监听的地址)
+      uint32    originator port
+</code></pre></div></div>
+<p>客户端应该比对是否向服务器请求了originator port的TCP/IP端口转发。</p>
+
+<p>当客户端本地的TCP/IP转发端口接收到来自外部的连接（这个监听端口是客户端主动打开的）时，客户端发送如下消息给服务器转发这个TCP/IP数据。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_CHANNEL_OPEN
+      string    "direct-tcpip"
+      uint32    sender channel
+      uint32    initial window size
+      uint32    maximum packet size
+      string    host to connect
+      uint32    port to connect
+      string    originator IP address
+      uint32    originator port
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">host to connect</code>和<code class="language-plaintext highlighter-rouge">port to connect</code>表示服务端内部需要建立一个通往<code class="language-plaintext highlighter-rouge">host to connect</code>、<code class="language-plaintext highlighter-rouge">port to connect</code>的连接。<code class="language-plaintext highlighter-rouge">originator IP address</code>表示客户端监听到的连接发起于哪个外部IP地址、<code class="language-plaintext highlighter-rouge">originator port</code>表示客户端监听到的连接发起于哪个外部主机的端口。</p>
+
+<p>转发Channel独立于Session存在，Session关闭并不意味着转发Channel也要被关闭。客户端应该拒绝<code class="language-plaintext highlighter-rouge">direct-tcpip</code>请求。</p>
+
+<h2 id="终端模式的编码">终端模式的编码</h2>
+
+<p>在请求一个终端的时候会用到终端模式的编码（<code class="language-plaintext highlighter-rouge">encoded terminal modes</code>），它们被编码进字节流里。这是为了他们可以方便地在不同环境间传输。字节流包括以字节为值地操作码构成地参数对。1-159的操作码时uint32类型的参数，160-255还未被定义，并且如果遇到它们应该停止解析。字节流被操作码<code class="language-plaintext highlighter-rouge">TTY_OP_END(0x00)</code>终止。</p>
+
+<p>客户端应该尽可能的把它知道的模式操作码加入字节流中，而服务器对于它不知道的模式应该忽略。至少在用类POSIX 虚拟终端的系统间，会支持一些机器无关的特性。这个协议也能支持其他的系统，但是客户端或许需要补充一系列合理的参数数值这样服务器才能为伪终端提供合理的模式。具体预定义数值如下（为了可读性，将Byte写成了数字）：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>          opcode  mnemonic       description
+          ------  --------       -----------
+          0     TTY_OP_END  Indicates end of options.
+          1     VINTR       Interrupt character; 255 if none.  Similarly
+                             for the other characters.  Not all of these
+                             characters are supported on all systems.
+          2     VQUIT       The quit character (sends SIGQUIT signal on
+                             POSIX systems).
+          3     VERASE      Erase the character to left of the cursor.
+          4     VKILL       Kill the current input line.
+          5     VEOF        End-of-file character (sends EOF from the
+                             terminal).
+          6     VEOL        End-of-line character in addition to
+                             carriage return and/or linefeed.
+          7     VEOL2       Additional end-of-line character.
+          8     VSTART      Continues paused output (normally
+                             control-Q).
+          9     VSTOP       Pauses output (normally control-S).
+          10    VSUSP       Suspends the current program.
+          11    VDSUSP      Another suspend character.
+                    12    VREPRINT    Reprints the current input line.
+          13    VWERASE     Erases a word left of cursor.
+          14    VLNEXT      Enter the next character typed literally,
+                             even if it is a special character
+          15    VFLUSH      Character to flush output.
+          16    VSWTCH      Switch to a different shell layer.
+          17    VSTATUS     Prints system status line (load, command,
+                             pid, etc).
+          18    VDISCARD    Toggles the flushing of terminal output.
+          30    IGNPAR      The ignore parity flag.  The parameter
+                             SHOULD be 0 if this flag is FALSE,
+                             and 1 if it is TRUE.
+          31    PARMRK      Mark parity and framing errors.
+          32    INPCK       Enable checking of parity errors.
+          33    ISTRIP      Strip 8th bit off characters.
+          34    INLCR       Map NL into CR on input.
+          35    IGNCR       Ignore CR on input.
+          36    ICRNL       Map CR to NL on input.
+          37    IUCLC       Translate uppercase characters to
+                             lowercase.
+          38    IXON        Enable output flow control.
+          39    IXANY       Any char will restart after stop.
+          40    IXOFF       Enable input flow control.
+          41    IMAXBEL     Ring bell on input queue full.
+          50    ISIG        Enable signals INTR, QUIT, [D]SUSP.
+          51    ICANON      Canonicalize input lines.
+          52    XCASE       Enable input and output of uppercase
+                             characters by preceding their lowercase
+                             equivalents with "\".
+          53    ECHO        Enable echoing.
+          54    ECHOE       Visually erase chars.
+          55    ECHOK       Kill character discards current line.
+          56    ECHONL      Echo NL even if ECHO is off.
+          57    NOFLSH      Don't flush after interrupt.
+          58    TOSTOP      Stop background jobs from output.
+          59    IEXTEN      Enable extensions.
+          60    ECHOCTL     Echo control characters as ^(Char).
+          61    ECHOKE      Visual erase for line kill.
+          62    PENDIN      Retype pending input.
+          70    OPOST       Enable output processing.
+          71    OLCUC       Convert lowercase to uppercase.
+          72    ONLCR       Map NL to CR-NL.
+          73    OCRNL       Translate carriage return to newline
+                             (output).
+          74    ONOCR       Translate newline to carriage
+                             return-newline (output).
+          75    ONLRET      Newline performs a carriage return
+                             (output).
+          90    CS7         7 bit mode.
+          91    CS8         8 bit mode.
+          92    PARENB      Parity enable.
+          93    PARODD      Odd parity, else even.
+
+          128 TTY_OP_ISPEED  Specifies the input baud rate in
+                              bits per second.
+          129 TTY_OP_OSPEED  Specifies the output baud rate in
+                              bits per second.
+</code></pre></div></div>
+
+<h2 id="预定义名称">预定义名称</h2>
+
+<h3 id="连接协议channel类型">连接协议Channel类型</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>         Channel type                  Reference
+         ------------                  ---------
+         session                       [SSH-CONNECT, Section 6.1]
+         x11                           [SSH-CONNECT, Section 6.3.2]
+         forwarded-tcpip               [SSH-CONNECT, Section 7.2]
+         direct-tcpip                  [SSH-CONNECT, Section 7.2]
+</code></pre></div></div>
+
+<h3 id="连接协议全局请求名">连接协议全局请求名</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>         Request type                  Reference
+         ------------                  ---------
+         tcpip-forward                 [SSH-CONNECT, Section 7.1]
+         cancel-tcpip-forward          [SSH-CONNECT, Section 7.1]
+</code></pre></div></div>
+
+<h3 id="连接协议channel明细请求名">连接协议Channel明细请求名</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>         Request type                  Reference
+         ------------                  ---------
+         pty-req                       [SSH-CONNECT, Section 6.2]
+         x11-req                       [SSH-CONNECT, Section 6.3.1]
+         env                           [SSH-CONNECT, Section 6.4]
+         shell                         [SSH-CONNECT, Section 6.5]
+         exec                          [SSH-CONNECT, Section 6.5]
+         subsystem                     [SSH-CONNECT, Section 6.5]
+         window-change                 [SSH-CONNECT, Section 6.7]
+         xon-xoff                      [SSH-CONNECT, Section 6.8]
+         signal                        [SSH-CONNECT, Section 6.9]
+         exit-status                   [SSH-CONNECT, Section 6.10]
+         exit-signal                   [SSH-CONNECT, Section 6.10]
+</code></pre></div></div>
+<h3 id="连接协议子系统名">连接协议子系统名</h3>
+
+<p>暂无</p>
+
+<h2 id="reference">Reference</h2>
+
+<ol>
+  <li>
+    <p><a href="https://www.openssh.com/specs.html">OpenSSH Specifications</a></p>
+
+    <p>这是OpenSSH所展现的最直接的资料页面，但是有很多细节部分的规格与实现没有罗列。而且RFC文档错综复杂，有很多地方都引用不全必须靠“幸运”才能翻看到。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4251">The Secure Shell (SSH) Protocol Architecture</a></p>
+
+    <p>SSH协议架构的rfc页面，它将SSH分为三部分，传输、认证和连接。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4250">The Secure Shell (SSH) Protocol Assigned Numbers</a></p>
+
+    <p>规定协议中各种ID（宏）所使用的序号。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4254">The Secure Shell (SSH) Connection Protocol</a></p>
+
+    <p>规定SSH连接协议。</p>
+  </li>
+  <li>
+    <p><a href="https://github.com/openssh/openssh-portable">OpenSSH Portable</a></p>
+
+    <p>OpenSSH的源码。</p>
+  </li>
+</ol>
+:ET

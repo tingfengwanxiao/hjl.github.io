@@ -1,0 +1,34 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#问题背景" id="markdown-toc-问题背景">问题背景</a></li>
+  <li><a href="#问题表现" id="markdown-toc-问题表现">问题表现</a></li>
+  <li><a href="#解决方案" id="markdown-toc-解决方案">解决方案</a></li>
+</ul>
+
+<h2 id="问题背景">问题背景</h2>
+
+<ol>
+  <li>Mac作为客户机连接位于同局域网下Windows内部的CentOS虚拟机。</li>
+  <li>Mac设置了<code class="language-plaintext highlighter-rouge">主机名</code>。</li>
+</ol>
+
+<h2 id="问题表现">问题表现</h2>
+
+<ol>
+  <li>SSH连接十分缓慢，不论使用任何软件。</li>
+  <li>SSH缓慢分为两个阶段：
+    <ol>
+      <li>确认密码之前使用<code class="language-plaintext highlighter-rouge">-v</code>输出详细信息，Mac端将会停留在<code class="language-plaintext highlighter-rouge">SSH2_MSG_SERVICE_ACCEPT received</code>10秒左右。</li>
+      <li>输入密码后，没有更多输出，并停留一分钟左右。</li>
+    </ol>
+  </li>
+</ol>
+
+<h2 id="解决方案">解决方案</h2>
+
+<ol>
+  <li>进入Server端:<code class="language-plaintext highlighter-rouge">sudo vim /etc/ssh/sshd_config</code>。</li>
+  <li>` UseDNS no`。</li>
+  <li>重启sshd。</li>
+</ol>
+
+:ET

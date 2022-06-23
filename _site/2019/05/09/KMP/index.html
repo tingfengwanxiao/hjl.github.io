@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>算法（一）：KMP</title>
+  <meta name="description"
+    content="KMP算法应该算是我学习程序开发以来第一个真正独立学习理解的算法，看了许多网络上的视频和文字教程依旧很难彻底掌握（尤其是next数组的计算过程），所以我将我对于该算法的主观认识记录于此。">
+  <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+
+  <link rel="stylesheet" href="/css/main.css ">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+  <link rel="canonical" href="http://localhost:4000/2019/05/09/KMP/">
+  <link rel="alternate" type="application/rss+xml" title="LiangLab"
+    href="http://localhost:4000/feed.xml ">
+
+  
+  
+  <script>
+    // google analytics
+    (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-137230515-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+
+  
+  <script src="/demos/base/js/demo-made.js"></script>
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>算法（一）：KMP | LiangLab</title>
+<meta name="generator" content="Jekyll v4.2.2" />
+<meta property="og:title" content="算法（一）：KMP" />
+<meta name="author" content="Anon" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="一个算法白痴对于KMP算法的学习记录。" />
+<meta property="og:description" content="一个算法白痴对于KMP算法的学习记录。" />
+<link rel="canonical" href="http://localhost:4000/2019/05/09/KMP/" />
+<meta property="og:url" content="http://localhost:4000/2019/05/09/KMP/" />
+<meta property="og:site_name" content="LiangLab" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-05-09T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="算法（一）：KMP" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/05/09/KMP/","author":{"@type":"Person","name":"Anon"},"@type":"BlogPosting","description":"一个算法白痴对于KMP算法的学习记录。","headline":"算法（一）：KMP","dateModified":"2019-05-09T00:00:00+08:00","datePublished":"2019-05-09T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/05/09/KMP/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+  <body style="background:white;">
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">LiangLab</a>
+
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>文章
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>博客
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>算法（一）：KMP</h1>
+        <div>
+            <hr>
+        </div>
+
+
+
+
+        <div class="label">
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-calendar"></i>2019-05-09
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-user"></i>Anon
+                
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" >
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#算法" title="Category: 算法" rel="category">算法</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+        <!--a href="/tag/#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="Tag: 数据结构" rel="tag">数据结构</a-->
+        <a href="/tag/#数据结构" title="Tag: 数据结构" rel="tag">数据结构</a>
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#bf" id="markdown-toc-bf">BF</a></li>
+  <li><a href="#kmp" id="markdown-toc-kmp">KMP</a></li>
+  <li><a href="#next数组" id="markdown-toc-next数组">Next数组</a>    <ul>
+      <li><a href="#逐步讨论" id="markdown-toc-逐步讨论">逐步讨论</a>        <ul>
+          <li><a href="#ababdababab" id="markdown-toc-ababdababab">ababdababab</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#实现" id="markdown-toc-实现">实现</a>    <ul>
+      <li><a href="#kmp-1" id="markdown-toc-kmp-1">KMP</a></li>
+      <li><a href="#next" id="markdown-toc-next">Next</a></li>
+      <li><a href="#nextval" id="markdown-toc-nextval">Nextval</a></li>
+    </ul>
+  </li>
+  <li><a href="#后记" id="markdown-toc-后记">后记</a></li>
+</ul>
+<p>KMP算法应该算是我学习程序开发以来第一个真正独立学习理解的算法，看了许多网络上的视频和文字教程依旧很难彻底掌握（尤其是next数组的计算过程），所以我将我对于该算法的主观认识记录于此。</p>
+
+<hr />
+
+<h2 id="bf">BF</h2>
+
+<p>Brute-Force(BF) 算法又称naive算法，是对字符串子串搜索最简单明了的算法。其主旨就是：</p>
+
+<ol>
+  <li>不处理模式串</li>
+  <li>模式串从目标串<strong>第一个元素</strong>起逐一匹配</li>
+  <li>发现无法匹配，模式串匹配右移一位，从下一位目标串元素重新初始逐一元素匹配</li>
+</ol>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/bf_quickest.gif" /></div></center>
+
+<p>虽然简单易懂，但是同时也导致了复杂度较高，最慢的情形其复杂度可以到达O（模式串长 * 目标串长）。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/bf_lowest.gif" /></div></center>
+
+<h2 id="kmp">KMP</h2>
+
+<p>但是如果仔细观察，可以发现<strong>模式串</strong>本身是可以自带一些<strong>可被预先计算出</strong>的<strong>可用于加速匹配的信息</strong>的。</p>
+
+<p>当模式串的第K位失配时，前K-1位必然是匹配的，如果直接整体后移一位重新从头开始匹配那之前的那些<strong>已经匹配的信息</strong>就被浪费了。于是我们可以寻找<strong>最大的必定不需要再匹配的串</strong>，那这个串是什么呢？</p>
+
+<p>很显然，这个串就是[1,K-1]位串中<strong>最大且相同</strong>的<strong>头尾</strong>串（S）。当失配发生，可以直接<strong>保持目标串中的失配元素不变</strong>，移动模式串，K-1-S串长个单位重新匹配，这就是KMP算法。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/KMP.gif" /></div></center>
+
+<p>为什么要移动K-1-S串长个单位？失配元素前方一共有K-1个元素，最大相同头尾串长为S。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/KMP_shipei.PNG" /></div></center>
+
+<p>若移动小于K-1-S长度(例如K-1-S-1 = K - 1 - (S+1))，则必然无法匹配，因为不存在<strong>更大</strong>的相同首尾串，如下图中（bab不是相同首尾串，故必然不匹配）。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/KMP_shipei_1.PNG" /></div></center>
+
+<p>若移动大于K-1-S长度(例如K-1-S+1 = K - 1 - (S-1))，有可能匹配（当S-1同样是相同子串时），但是可能会因为多移动了位数而遗漏结果。</p>
+
+<p>KMP算法本身比较好理解，而关于KMP的实现需要引入一个Next数组（由模式串预处理出的数组），Next数组的本身的算法则很难理解。</p>
+
+<h2 id="next数组">Next数组</h2>
+
+<p>Next数组的含义很直观，就是<strong>第几个元素失配时应该右移模式串重新匹配第几个元素</strong>（不同的教材采用的首元素索引序号不同有的是0有的是1，这也是Next数组算法难以理解的一大原因，所以文中讨论索引序号都直接使用的是<strong>第</strong>几个元素）。</p>
+
+<p>Next数组的算法步骤如下图所示，在我们逐步讨论完其算法过程后再会看这张动图或许你会有更深刻地理解。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next.gif" /></div></center>
+
+<h3 id="逐步讨论">逐步讨论</h3>
+
+<p>对于模式串的首个元素的Next值，约定为<strong>首元素索引值 - 1</strong>，这么做仅仅是为了<strong>方便实现递归算法</strong>。这个值<strong>不一定只为首元素的Next值</strong>，经过优化后可能为其他元素的Next值，这个值（首元素索引 - 1）的含义是：</p>
+
+<p>将<strong>模式串</strong>的<strong>首元素</strong>移动到<strong>失配元素后一位</strong>并从首元素开始，重新匹配。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/Next_interpretation_0.gif" /></div></center>
+
+<h4 id="ababdababab">ababdababab</h4>
+
+<p>第一步：初始化首元素的Next值。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-736.png" /></div></center>
+
+<p>第二步：<strong>讨论第一个元素的Next值</strong>，从而决定第二个元素的Next值。发现第二个元素无法匹配时，<strong>前方并不存在免匹配元素（不存在相同的首尾串）</strong>，故值为首元素索引。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-7696.png" /></div></center>
+
+<p>第三步：<strong>讨论第二个元素的Next值</strong>，从而决定第三个元素的Next值。发现第三个元素无法匹配时，第二个元素无法通过它自身的Next值对应的元素（索引为1的元素a）以及如此递归，构成相同首尾的串。因此第三个元素前方不存在相同首尾串，因此其Next值为首元素索引。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-7982.png" /></div></center>
+
+<p>第四步：<strong>讨论第三个元素的Next值</strong>，从而决定第四个元素的Next值。发现第四个元素无法匹配时，第三个元素（a）与其Next值（1）对应的元素（a）（第一个元素）相同，因此<strong>第三个元素必定在一个具有相同首尾的串的尾串中，并且扮演最尾元素的角色</strong>，其串长为0（首元素的Next值为0，在这里阻止递归，约定其串长为0）+1 = 1。因此第四个元素的Next值为<strong>上述的新构建的首串尾元素的索引值 （第三个元素的Next值） + 1</strong>即2。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-8273.png" /></div></center>
+
+<p>第五步：<strong>讨论第四个元素的Next值</strong>，从而决定第五个元素的Next值。（基本上与第四步相同）发现第五个元素无法匹配时，第四个元素（b）与其Next值（2）对应的元素（b）（第二个元素）相同，因此<strong>第四个元素必定在一个具有相同首尾的串的尾串中，并且扮演最尾元素的角色</strong>，其串长为（（首元素的Next值为0，在这里阻止递归，约定其串长为0）+1 ） + 1= 2。因此第五个元素的Next值为<strong>上述的新构建的首串尾元素的索引值 （第四个元素的Next值） + 1</strong>即3。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-8568.png" /></div></center>
+
+<p>第六步：<strong>讨论第五个元素的Next值</strong>，从而决定第六个元素的Next值。发现第六个元素无法匹配时，第五个元素（d）与其Next值（3）对应的元素（a）（第三个元素）不相同，也不与第三个元素的Next值（1）对应的元素（a）相同，如此递归都无法找到一个相同的元素构成相同首尾的串。因此<strong>第一直到第五个元素构成的串不存在相同的首部和尾部</strong>，因此<strong>不存在免匹配的部分</strong>，因此第六个元素的Next值为首元素的索引值即为1。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-8829.png" /></div></center>
+
+<p>第七步：<strong>讨论第六个元素的Next值</strong>，从而决定第七个元素的Next值。发现第七个元素无法匹配时，第六个元素（a）与其Next值（1）对应的元素（a）（第一个元素）相同，因此<strong>第六个元素必定在一个具有相同首尾的串的尾串中，并且扮演最尾元素的角色</strong>，其串长为（首元素的Next值为0，在这里阻止递归，约定其串长为0）+1  = 1。因此第七个元素的Next值为<strong>上述的新构建的首串尾元素的索引值 （第六个元素的Next值） + 1</strong>即2。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-9085.png" /></div></center>
+
+<p>第八步：<strong>讨论第七个元素的Next值</strong>，从而决定第八个元素的Next值。发现第八个元素无法匹配时，第七个元素（b）与其Next值（2）对应的元素（b）（第二个元素）相同，因此<strong>第七个元素必定在一个具有相同首尾的串的尾串中，并且扮演最尾元素的角色</strong>，其串长为（（首元素的Next值为0，在这里阻止递归，约定其串长为0）+1）+1  = 2。因此第八个元素的Next值为<strong>上述的新构建的首串尾元素的索引值 （第七个元素的Next值） + 1</strong>即3。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-9335.png" /></div></center>
+
+<p>第九步：<strong>讨论第八个元素的Next值</strong>，从而决定第九个元素的Next值。发现第九个元素无法匹配时，第八个元素（a）与其Next值（3）对应的元素（a）（第三个元素）相同，因此<strong>第八个元素必定在一个具有相同首尾的串的尾串中，并且扮演最尾元素的角色</strong>，其串长为（（（首元素的Next值为0，在这里阻止递归，约定其串长为0）+1）+1）+ 1= 3。因此第九个元素的Next值为<strong>上述的新构建的首串尾元素的索引值 （第八个元素的Next值） + 1</strong>即4。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-9591.png" /></div></center>
+
+<p>第十步：<strong>讨论第九个元素的Next值</strong>，从而决定第十个元素的Next值。发现第十个元素无法匹配时，第九个元素（b）与其Next值（4）对应的元素（b）（第四个元素）相同，因此<strong>第九个元素必定在一个具有相同首尾的串的尾串中，并且扮演最尾元素的角色</strong>，其串长为（（（（首元素的Next值为0，在这里阻止递归，约定其串长为0）+1）+1）+ 1）+ 1= 4。因此第十个元素的Next值为<strong>上述的新构建的首串尾元素的索引值 （第九个元素的Next值） + 1</strong>即5。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-07-9847.png" /></div></center>
+
+<p>第十一步：<strong>讨论第十个元素的Next值</strong>，从而决定第十一个元素的Next值。发现第十一个元素无法匹配时，第十个元素（a）与其Next值（5）对应的元素（d）（第五个元素）不相同。而和第五个元素d的Next值（3）对应的元素a相同，因此<strong>第十个元素必定在一个具有相同首尾的串的尾串中，并且扮演最尾元素的角色</strong>，其串长为（（（首元素的Next值为0，在这里阻止递归，约定其串长为0）+1）+1）+ 1= 3。因此第十个元素的Next值为<strong>上述的新构建的首串尾元素的索引值 （第五个元素的Next值） + 1</strong>即4。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next_step/0 04-49-08-0092.png" /></div></center>
+
+<h2 id="实现">实现</h2>
+
+<h3 id="kmp-1">KMP</h3>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// T 模式串， S目标串， pos第几个字符之后搜索</span>
+<span class="c1">// 约定索引起始值为1</span>
+<span class="kt">void</span> <span class="nf">Index_KMP</span><span class="p">(</span><span class="n">SString</span> <span class="n">S</span><span class="p">,</span> <span class="n">SString</span> <span class="n">T</span><span class="p">,</span> <span class="kt">int</span> <span class="n">pos</span><span class="p">){</span>
+	<span class="c1">// i 目标串指针，j 模式串指针</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">pos</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="c1">// 只要指针没有溢出对应的串</span>
+    <span class="k">while</span><span class="p">(</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">length</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">)){</span>
+        <span class="c1">// 如果将要和 目标串元素 匹配的元素是模式串首元素前一位的元素</span>
+        <span class="c1">// 或者</span>
+        <span class="c1">// 当前目标串元素 和 模式串元素可以匹配</span>
+        <span class="c1">// if (j == first_indexof(T) - 1 || S[i] == T[j]){</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]){</span>
+        	<span class="c1">// 指针各自右移一位</span>
+            <span class="o">++</span><span class="n">i</span><span class="p">;</span>
+            <span class="o">++</span><span class="n">j</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+            <span class="c1">// 发生了失配，查Next数组移动模式串指针</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">)){</span>
+        <span class="c1">// 如果模式串指针溢出了（模式串指针匹配完毕了所有模式串中的元素）</span>
+    	<span class="k">return</span> <span class="n">i</span> <span class="o">-</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="next">Next</h3>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// T 模式串， next Next数组</span>
+<span class="c1">// 约定索引起始值为1</span>
+<span class="kt">void</span> <span class="nf">get_next</span><span class="p">(</span><span class="n">SString</span> <span class="n">T</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">next</span><span class="p">[]){</span>
+    <span class="c1">// i 计算每一个元素Next值的指针，它只可能右移用于计算下一个元素的Next值</span>
+    <span class="c1">// j 用于指向 无法找到头尾串时 的递归回溯的元素 </span>
+    <span class="c1">// 初始化第一个元素的Next值</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">next</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">)){</span>
+        <span class="c1">// 如果递归回溯到第一个元素，它的next值为0，就无法继续回溯 -&gt; 下一位元素的 Next值 就会等于 第一个元素的索引（1 即 0 + 1）</span>
+        <span class="c1">// 如果 当前元素 等于 当前元素Next值对应的元素 -&gt; 下一个元素的 Next值 就会等于 当前元素的Next值 + 1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]){</span>
+            <span class="o">++</span><span class="n">i</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">;</span> <span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span><span class="p">{</span>
+            <span class="c1">// 否则递归回溯j，将其指向更小的一个同首尾的子串的尾部 + 1</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="nextval">Nextval</h3>
+
+<p>(以下的讨论假设不需要递归以简化讨论过程)</p>
+
+<p>优化Next，当第<code class="language-plaintext highlighter-rouge">i+1</code>位失配的时候。通常，我们按照算法会比较 <code class="language-plaintext highlighter-rouge">T[i]</code> 和 <code class="language-plaintext highlighter-rouge">T[next[i]]</code>，若它们相同则将<code class="language-plaintext highlighter-rouge">Next[i+1]</code>设置成<code class="language-plaintext highlighter-rouge">Next[i] + 1</code>。但是，如果 <code class="language-plaintext highlighter-rouge">T[Next[i] + 1]</code>和失配元素（<code class="language-plaintext highlighter-rouge">T[i+1]</code>）相同时，这样设置则是多余的（Next元素的含义就是，某个元素失配时用哪个元素补充匹配，若补充匹配的元素和失配元素相同则这样设置是多余的）。所以，此时应该把<code class="language-plaintext highlighter-rouge">Next[i+1]</code>设置成<code class="language-plaintext highlighter-rouge">Next[Next[i] + 1]</code>，就是当<code class="language-plaintext highlighter-rouge">Next[i]+1</code>失配时应该用哪个元素补充匹配。</p>
+
+<p>那为什么<code class="language-plaintext highlighter-rouge">T[Next[Next[i] + 1]]</code>不会等于<code class="language-plaintext highlighter-rouge">T[i+1]</code>呢？因为按照这样的算法<strong>递推</strong>是从第一个元素开始计算，可以确保除了当前失配的元素以外，<strong>之前的任意一个元素（索引为m）</strong>都不可能等于<code class="language-plaintext highlighter-rouge">T[Next[m]+1]</code>。</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// T 模式串， next Next数组</span>
+<span class="c1">// 约定索引起始值为1</span>
+<span class="kt">void</span> <span class="nf">get_nextval</span><span class="p">(</span><span class="n">SString</span> <span class="n">T</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">nextval</span><span class="p">[]){</span>
+    <span class="c1">// i 计算每一个元素Next值的指针，它只可能右移用于计算下一个元素的Next值</span>
+    <span class="c1">// j 用于指向 无法找到头尾串时 的递归回溯的元素 </span>
+    <span class="c1">// 初始化第一个元素的Next值</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">nextval</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">(</span><span class="n">T</span><span class="p">)){</span>
+        <span class="c1">// 如果递归回溯到第一个元素，它的next值为0，就无法继续回溯 </span>
+        <span class="c1">// 如果 当前元素 等于 当前元素Next值对应的元素 </span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]){</span>
+            <span class="o">++</span><span class="n">i</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">;</span> 
+            <span class="k">if</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">T</span><span class="p">[</span><span class="n">j</span><span class="p">]){</span>
+                <span class="c1">// 如果替补匹配的值不等于当前失配值,则设置它的索引为Next值</span>
+	            <span class="n">nextval</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+            <span class="p">}</span>
+    		<span class="k">else</span><span class="p">{</span>
+                <span class="c1">// 否则设置它的Next值为当前失配值的Next值</span>
+                <span class="n">nextval</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">else</span><span class="p">{</span>
+            <span class="c1">// 否则递归回溯j，将其指向更小的一个同首尾的子串的尾部 + 1</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">nextval</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="后记">后记</h2>
+
+<p>如果还是不能看懂Next数组的程序实现，推荐自己手动制作一下下图Next数组算法的逐帧动画，会帮助理解很多。</p>
+
+<center><div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/KMP/next.gif" /></div></center>
+
+        </article>
+        <br>
+        <div class="copyright">
+        <h4>文档信息</h4>
+        <ul>
+            <li>作者: 
+                
+                    Anon
+                
+                
+                
+                <a href="mailto:devtsai@outlook.com" title="devtsai@outlook.com"><i class="far fa-envelope-open" aria-hidden="true"></i></a> 
+                 
+            </li>
+            
+            
+            <li>发表日期： <abbr title="2019-05-09T00:00:00+08:00">
+                2019-05-09
+               </abbr></li>
+            <li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+            <li>若文章中存在事实上的错误，欢迎评论或与作者联系。</li>
+        </ul>
+</div>
+<style type="text/css">
+    .copyright{
+            margin-top:1em;
+            padding:1em;
+            border:1px solid #d3d3d3;
+            background-color:#DEEBF7;
+        }
+        
+        .copyright h4{
+            margin-top: 2px;
+            border-bottom:1px solid gray;
+            font-size:1.5em;
+            font-weight:bold;
+            color:#556677;
+        }
+        
+        .copyright ul{
+            padding-left:2em;
+            padding-right:2em;
+        }
+        
+        .copyright li{
+            color:#556677;
+        }
+</style>
+    
+        <hr>
+
+        
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                        
+                        <h2 id="similar_posts">相关文章</h2>
+                        <ul>
+                        
+                        <li class="relatedPost">
+                            <strong> 2019-05-16: <a href="/2019/05/16/MatrixMulti/" style="text-decoration:underline;margin-left:1em;">算法（三）：稀疏矩阵的乘法</a></strong>
+                            
+                                <blockquote>
+  <p>无。</p>
+</blockquote>
+
+                            
+                        </li>
+                        
+                        
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                        
+                        <li class="relatedPost">
+                            <strong> 2019-05-15: <a href="/2019/05/15/QuickMatrixTrans/" style="text-decoration:underline;margin-left:1em;">算法（二）：稀疏矩阵快速转置算法</a></strong>
+                            
+                                <blockquote>
+  <p>深入学习算法关于“用空间换时间”的思想。</p>
+</blockquote>
+
+                            
+                        </li>
+                        
+                        
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+        
+            </ul>
+        
+        <hr>
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2019/05/08/DataStructure_String_C++/">数据结构（五）：串的C++实现</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/05/13/Pic_bed/">自建图床</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">评论</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2019/05/09/KMP/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2019/05/09/KMP/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//emous-github-io.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#similar_posts">Similar Posts</a></li>
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])');
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+            
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="mailto:devtsai@outlook.com" title="email"><i class="far fa-envelope-open" aria-hidden="true"></i></a>  
+            <a href="https://github.com/emous" title="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>  
+            <a href=" https://stackoverflow.com/users/9212741/anon" title="StackOverflow"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a>
+            <a href="https://Liang.blogspot.com/" title="Blogger"><i class="fab fa-blogger" aria-hidden="true"></i></a> 
+
+             
+             
+             
+              
+             
+            
+        </p>
+         <p class="text-center">
+            LiangLab 2022 |
+            Welcome You
+        </p>
+
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>

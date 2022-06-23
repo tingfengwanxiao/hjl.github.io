@@ -1,0 +1,45 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#tabstop" id="markdown-toc-tabstop">tabstop</a></li>
+  <li><a href="#expandtab" id="markdown-toc-expandtab">expandtab</a></li>
+  <li><a href="#softtabstop" id="markdown-toc-softtabstop">softtabstop</a></li>
+  <li><a href="#shiftwidth" id="markdown-toc-shiftwidth">shiftwidth</a></li>
+  <li><a href="#smarttab" id="markdown-toc-smarttab">smarttab</a></li>
+  <li><a href="#notice" id="markdown-toc-notice">Notice</a></li>
+</ul>
+
+<h4 id="tabstop">tabstop</h4>
+
+<p>一个<code class="language-plaintext highlighter-rouge">\t</code>被解释成的长度</p>
+
+<h4 id="expandtab">expandtab</h4>
+
+<p>是否将<strong>从Vim输入的</strong><code class="language-plaintext highlighter-rouge">\t</code>转换成空格</p>
+
+<h4 id="softtabstop">softtabstop</h4>
+
+<p>Insert模式下，按下tab后显示的空格长度，如果expandtab开启，那将只输出对应长度的空格，按下backspace将删除对应长度。如果expandtab没有开启，那输出将混合<code class="language-plaintext highlighter-rouge">\t</code>和空格。</p>
+
+<h4 id="shiftwidth">shiftwidth</h4>
+
+<p>Normal模式下，”»“或”«“行首缩进的长度，不会智能控制（不会管之前已经有多少个空格），按下后就会添加或减少对应个数的空格。如果expandtab开启，则转换为对应的<code class="language-plaintext highlighter-rouge">\t</code>。</p>
+
+<h4 id="smarttab">smarttab</h4>
+
+<p>如果开启，Insert模式下，在第一个可见字符钱，按下tab增加的长度将会是<code class="language-plaintext highlighter-rouge">shiftwidth</code>长度个，会根据已有的空格智能控制。</p>
+<blockquote>
+  <p>set ts=5 noet sts=6</p>
+</blockquote>
+
+<h4 id="notice">Notice</h4>
+
+<ol>
+  <li>已有文件中的<code class="language-plaintext highlighter-rouge">\t</code>一定不会变成空格</li>
+  <li>如果expandtab关闭，再空格后按下tab，会只能生成<code class="language-plaintext highlighter-rouge">\t</code></li>
+  <li>当前设置:</li>
+</ol>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>set ts=5 sts=8 sw=5 sta 
+set listchars=tab:&lt;-&gt;
+" set list " 显示tab, 还可以显示eol，显示空格等等
+</code></pre></div></div>
+:ET

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>算法（三）：稀疏矩阵的乘法</title>
+  <meta name="description"
+    content="">
+  <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+
+  <link rel="stylesheet" href="/css/main.css ">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+  <link rel="canonical" href="http://localhost:4000/2019/05/16/MatrixMulti/">
+  <link rel="alternate" type="application/rss+xml" title="LiangLab"
+    href="http://localhost:4000/feed.xml ">
+
+  
+  
+  <script>
+    // google analytics
+    (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-137230515-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+
+  
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    tex2jax: { inlineMath: [["$","$"],["\\(","\\)"]] },
+    "HTML-CSS": {
+      linebreaks: { automatic: true, width: "container" }
+    }
+});
+</script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  
+  <script src="/demos/base/js/demo-made.js"></script>
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>算法（三）：稀疏矩阵的乘法 | LiangLab</title>
+<meta name="generator" content="Jekyll v4.2.2" />
+<meta property="og:title" content="算法（三）：稀疏矩阵的乘法" />
+<meta name="author" content="Anon" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="无。" />
+<meta property="og:description" content="无。" />
+<link rel="canonical" href="http://localhost:4000/2019/05/16/MatrixMulti/" />
+<meta property="og:url" content="http://localhost:4000/2019/05/16/MatrixMulti/" />
+<meta property="og:site_name" content="LiangLab" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-05-16T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="算法（三）：稀疏矩阵的乘法" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/05/16/MatrixMulti/","author":{"@type":"Person","name":"Anon"},"@type":"BlogPosting","description":"无。","headline":"算法（三）：稀疏矩阵的乘法","dateModified":"2019-05-16T00:00:00+08:00","datePublished":"2019-05-16T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/05/16/MatrixMulti/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+  <body style="background:white;">
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">LiangLab</a>
+
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>文章
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>博客
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>算法（三）：稀疏矩阵的乘法</h1>
+        <div>
+            <hr>
+        </div>
+
+
+
+
+        <div class="label">
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-calendar"></i>2019-05-16
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-user"></i>Anon
+                
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" >
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#算法" title="Category: 算法" rel="category">算法</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+        <!--a href="/tag/#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" title="Tag: 数据结构" rel="tag">数据结构</a-->
+        <a href="/tag/#数据结构" title="Tag: 数据结构" rel="tag">数据结构</a>
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#数据结构" id="markdown-toc-数据结构">数据结构</a></li>
+  <li><a href="#算法" id="markdown-toc-算法">算法</a></li>
+</ul>
+
+<hr />
+
+<h2 id="数据结构">数据结构</h2>
+
+<p>回顾上次我们描述<strong><a href="/2019/05/15/QuickMatrixTrans/">稀疏矩阵转置算法</a></strong>时描述稀疏矩阵的数据结构。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp"># define MAXSIZE 12500          // 最大的非零元素个数
+</span><span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">;</span>               		<span class="c1">// 分别表示非零元素的行下标和列下标</span>
+    <span class="n">ElemType</span> <span class="n">e</span><span class="p">;</span>                	<span class="c1">// 元素值</span>
+<span class="p">}</span><span class="n">Triple</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">union</span><span class="p">{</span>
+    <span class="n">Triple</span> <span class="n">data</span><span class="p">[</span><span class="n">MAXSIZE</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>  	<span class="c1">// 所有的非零元素， data[0]弃用</span>
+    <span class="kt">int</span> <span class="n">mu</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">tu</span><span class="p">;</span>             <span class="c1">// 矩阵的行数、列数和总共的非零元素个数</span>
+<span class="p">}</span><span class="n">TSMatrix</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>可以发现这个样的数据结构无法<strong>随机地定位任意一行非零元</strong>，因此为了方便做乘法，需要重构数据结构辅助创建一个<code class="language-plaintext highlighter-rouge">带有每行首个非零元位置的数组</code>。这类<code class="language-plaintext highlighter-rouge">带有行链接信息</code>的三元组表又被称作<code class="language-plaintext highlighter-rouge">行逻辑链接的顺序表</code>如下：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="n">Triple</span> <span class="n">data</span><span class="p">[</span><span class="n">MAXSIZE</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>  	<span class="c1">// 所有的非零元素， data[0]弃用</span>
+    <span class="kt">int</span> <span class="n">rpos</span><span class="p">[</span><span class="n">MAXRC</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>		<span class="c1">// 各行第一个非零元素的位置表</span>
+    <span class="kt">int</span> <span class="n">mu</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">tu</span><span class="p">;</span>             <span class="c1">// 矩阵的行数、列数和总共的非零元素个数</span>
+<span class="p">}</span><span class="n">TSMatrix</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h2 id="算法">算法</h2>
+
+<p>对于传统的矩阵相乘\(Q=M\times N\)，其中\(M\)为\(m_1\times n_1\)矩阵，\(N\)为\(m_2\times n_2\)矩阵，若\(n_1 = m_2 = K\)，则有：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">m1</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
+    <span class="c1">// 左矩阵的每一行</span>
+    <span class="k">for</span><span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n2</span><span class="p">){</span>
+       <span class="c1">// 右矩阵的每一列</span>
+        <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">n1</span><span class="p">;</span> <span class="o">++</span><span class="n">k</span><span class="p">){</span>
+            <span class="c1">// 左矩阵的列数 = 右矩阵的行数</span>
+            <span class="c1">// 对于左矩阵特定行 和 右矩阵特定列 元素逐一相乘再求和</span>
+            <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">N</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>该算法的时间复杂度为\(O(m_1 \times K \times n2)\)对于三元组表作为存储结构的时候上述的运算不能直接套用，可以做出如下分析：</p>
+
+<ol>
+  <li>
+    <p>乘积矩阵\(Q\)中元素的表示方式为：</p>
+
+\[\boldsymbol{Q}(i, j)=\sum_{k=1}^{K} M(i, k) \times N(k, j)
+\quad
+\begin{array}{}
+1 \leqslant i \leqslant m_{1}  \\ 
+1 \leqslant j \leqslant n_{2} 
+\end{array}\]
+  </li>
+  <li>
+    <p>0和任何数相乘都为0，因此上述算法中的 <code class="language-plaintext highlighter-rouge">M[i][k] * N[k][j]</code>中的<code class="language-plaintext highlighter-rouge">M[i][k]</code>和<code class="language-plaintext highlighter-rouge">N[k][j]</code>都必须为非0的项。</p>
+
+    <p>因此只需要确保<strong><code class="language-plaintext highlighter-rouge">M.data[each_p].j = N.data[each_q].i</code></strong>匹配的元素才进行运算。</p>
+  </li>
+  <li>
+    <p>若<code class="language-plaintext highlighter-rouge">M.data[p].j = N.data[q].i</code>，计算得到的<code class="language-plaintext highlighter-rouge">M.data[p].e * N.data[q].e</code>也只是目标矩阵的某个元的其中一部分，真正的元还需要累加这些结果，因此需要一个<strong>累加器</strong>来存储结果。</p>
+  </li>
+  <li>
+    <p>虽然\(M\)和\(N\)都是稀疏矩阵，但是结果未必是稀疏矩阵。同时，\(Q\)的元素是否是非零元只有在累加完毕后才能得知。<strong>由于\(Q\)中元素的行号和\(M\)中元素的行号一致，且\(M\)中元素的排列是以M的行序为主序的</strong>，所以对\(Q\)进行计算的时候可以对\(Q\)进行逐行处理，先求得中间结果（<strong>\(Q\)的一行</strong>），再压缩到<code class="language-plaintext highlighter-rouge">Q.data</code>中去。</p>
+  </li>
+</ol>
+
+<div style="text-align: center;"><img style="height:400px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/RLSMatrix/RLSMatrix_multi.gif" /></div>
+
+<p>具体思路如下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Q初始化
+if(M.tu * N.tu != 0){
+	for(M的每一行arow{
+		累加器清0
+		
+		计算Q中第arow行的N.nu个结果存入累加器
+		
+		将累加器中的非零元存入 Q.data
+	}
+}
+</code></pre></div></div>
+
+<p>具体算法如下:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">MultSMatrix</span><span class="p">(</span><span class="n">RLSMatrix</span> <span class="n">M</span><span class="p">,</span> <span class="n">RLSMatrix</span> <span class="n">N</span><span class="p">,</span> <span class="n">RLSMatrix</span> <span class="o">&amp;</span><span class="n">Q</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">M</span><span class="p">.</span><span class="n">nu</span> <span class="o">!=</span> <span class="n">N</span><span class="p">.</span><span class="n">mu</span><span class="p">)</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+    <span class="n">Q</span><span class="p">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">M</span><span class="p">.</span><span class="n">mu</span><span class="p">;</span> <span class="n">Q</span><span class="p">.</span><span class="n">nu</span> <span class="o">=</span> <span class="n">N</span><span class="p">.</span><span class="n">nu</span><span class="p">;</span> <span class="n">Q</span><span class="p">.</span><span class="n">tu</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 初始化Q</span>
+   	<span class="k">if</span><span class="p">(</span><span class="n">M</span><span class="p">.</span><span class="n">tu</span> <span class="o">*</span> <span class="n">N</span><span class="p">.</span><span class="n">tu</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">){</span>
+        <span class="c1">// 确保不能直接得出0矩阵的结果</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">arrow</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">arow</span> <span class="o">&lt;=</span> <span class="n">M</span><span class="p">.</span><span class="n">mu</span><span class="p">;</span> <span class="o">++</span><span class="n">arow</span><span class="p">){</span>
+            <span class="c1">// 处理 M 的每一行</span>
+            <span class="c1">// 当前行的各元素的累加器（数组长度为M.nu,最后ctemp中将为Q的第arow行的所有元素值）</span>
+            <span class="n">ctemp</span><span class="p">[]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="c1">// Q的每一行的第一个非0元素，都会等于目前Q的所有元素个数 + 1 （因为Q是行主序的）</span>
+            <span class="n">Q</span><span class="p">.</span><span class="n">rpos</span><span class="p">[</span><span class="n">arow</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">.</span><span class="n">tu</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="k">for</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">M</span><span class="p">.</span><span class="n">rpos</span><span class="p">[</span><span class="n">arow</span><span class="p">];</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">M</span><span class="p">.</span><span class="n">rpos</span><span class="p">[</span><span class="n">arow</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span> <span class="o">++</span><span class="n">p</span><span class="p">){</span>
+                <span class="c1">// 遍历M当前行的每一个非零元素（列）</span>
+                
+                <span class="c1">// 直接含义：获取当前元素的列号</span>
+                <span class="c1">// 隐藏含义：获取N中对应元素的行号</span>
+                <span class="n">brow</span> <span class="o">=</span> <span class="n">M</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">j</span><span class="p">;</span> 
+                
+                <span class="c1">// t为 N中对应行的最后一个元素的位置 + 1 （从而可以遍历N中对应的行，使得 累加器的的元素（列）都能增加，直到M当前行中的最后一个元素被遍历，累加器才全部构造好Q第一行的元素。）</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">brow</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">.</span><span class="n">nu</span><span class="p">)</span> <span class="n">t</span> <span class="o">=</span> <span class="n">N</span><span class="p">.</span><span class="n">rpos</span><span class="p">[</span><span class="n">brow</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+                <span class="k">else</span> <span class="p">{</span> <span class="n">t</span> <span class="o">=</span> <span class="n">N</span><span class="p">.</span><span class="n">tu</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="p">}</span>
+                <span class="k">for</span><span class="p">(</span><span class="n">q</span> <span class="o">=</span> <span class="n">N</span><span class="p">.</span><span class="n">rpos</span><span class="p">[</span><span class="n">brow</span><span class="p">];</span> <span class="n">q</span> <span class="o">&lt;</span> <span class="n">t</span><span class="p">;</span> <span class="o">++</span><span class="n">q</span><span class="p">){</span>
+                    <span class="c1">// 乘积元素在Q中的列号</span>
+                    <span class="n">ccol</span> <span class="o">=</span> <span class="n">N</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">j</span><span class="p">;</span>
+                    <span class="c1">// 累加每一列的乘积和</span>
+                    <span class="n">ctemp</span><span class="p">[</span><span class="n">ccol</span><span class="p">]</span> <span class="o">+=</span> <span class="n">M</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">e</span> <span class="o">*</span> <span class="n">N</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">q</span><span class="p">].</span><span class="n">e</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="c1">// 这一行的结果已经计算出。</span>
+            <span class="c1">// 压缩这一行到Q中。</span>
+            <span class="k">for</span><span class="p">(</span><span class="n">ccol</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">ccol</span> <span class="o">&lt;</span> <span class="n">Q</span><span class="p">.</span><span class="n">nu</span><span class="p">;</span> <span class="o">++</span><span class="n">ccol</span><span class="p">){</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">ctemp</span><span class="p">[</span><span class="n">ccol</span><span class="p">]){</span>
+                    <span class="k">if</span><span class="p">(</span><span class="o">++</span><span class="n">Q</span><span class="p">.</span><span class="n">tu</span> <span class="o">&gt;</span> <span class="n">MAXSIZE</span><span class="p">)</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+                    <span class="n">Q</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">Q</span><span class="p">.</span><span class="n">tu</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">arow</span><span class="p">,</span> <span class="n">ccol</span><span class="p">,</span> <span class="n">ctemp</span><span class="p">[</span><span class="n">ccol</span><span class="p">]};</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>分析上述算法可得，<code class="language-plaintext highlighter-rouge">ctemp</code>初始化的时间复杂度为\(O(M.mu \times N.nu)\)(初始化应该就是置空的意思，<code class="language-plaintext highlighter-rouge">ctemp</code>的元素个数是<code class="language-plaintext highlighter-rouge">N.nu</code>)。求\(Q\)的所有非零元的时间复杂度为\(O(M.mu \times N.tu/N.mu)\)(\(N.tu/N.mu\)就是平均每行的元素个数)，进行压缩的时间复杂度为\(O(M.mu \times N.nu)\)。因此，总复杂度是\(O(M.mu \times N.nu + M.tu \times N.tu/N.mu)\)。</p>
+
+<p>当\(M\)是一个\(m\)行\(n\)列的稀疏矩阵，\(N\)是一个$n$行$p$列的稀疏矩阵。则$M$中的非零元素个数为$\mathrm{M} . \mathrm{tu}=\delta_{\mathrm{M}} \times \mathrm{m} \times \mathrm{n}$，$N$中的非零元素个数为$\mathrm{N} . \mathrm{tu}=\delta_{\mathrm{N}} \times \mathrm{n} \times \mathrm{p}$。此时算法总体的时间复杂度为$O(m \times p \times (1 + n\delta_{\mathrm{M}}\delta_{\mathrm{N}}))$，当$\delta_{\mathrm{M}} &lt; 0.05$和$\delta_{\mathrm{N}} &lt; 0.05$及$n &lt; 1000$时就相当于$O(m \times p)$。</p>
+
+
+        </article>
+        <br>
+        <div class="copyright">
+        <h4>文档信息</h4>
+        <ul>
+            <li>作者: 
+                
+                    Anon
+                
+                
+                
+                <a href="mailto:devtsai@outlook.com" title="devtsai@outlook.com"><i class="far fa-envelope-open" aria-hidden="true"></i></a> 
+                 
+            </li>
+            
+            
+            <li>发表日期： <abbr title="2019-05-16T00:00:00+08:00">
+                2019-05-16
+               </abbr></li>
+            <li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+            <li>若文章中存在事实上的错误，欢迎评论或与作者联系。</li>
+        </ul>
+</div>
+<style type="text/css">
+    .copyright{
+            margin-top:1em;
+            padding:1em;
+            border:1px solid #d3d3d3;
+            background-color:#DEEBF7;
+        }
+        
+        .copyright h4{
+            margin-top: 2px;
+            border-bottom:1px solid gray;
+            font-size:1.5em;
+            font-weight:bold;
+            color:#556677;
+        }
+        
+        .copyright ul{
+            padding-left:2em;
+            padding-right:2em;
+        }
+        
+        .copyright li{
+            color:#556677;
+        }
+</style>
+    
+        <hr>
+
+        
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                        
+                        <h2 id="similar_posts">相关文章</h2>
+                        <ul>
+                        
+                        <li class="relatedPost">
+                            <strong> 2019-05-15: <a href="/2019/05/15/QuickMatrixTrans/" style="text-decoration:underline;margin-left:1em;">算法（二）：稀疏矩阵快速转置算法</a></strong>
+                            
+                                <blockquote>
+  <p>深入学习算法关于“用空间换时间”的思想。</p>
+</blockquote>
+
+                            
+                        </li>
+                        
+                        
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                        
+                        <li class="relatedPost">
+                            <strong> 2019-05-09: <a href="/2019/05/09/KMP/" style="text-decoration:underline;margin-left:1em;">算法（一）：KMP</a></strong>
+                            
+                                <blockquote>
+  <p>一个算法白痴对于KMP算法的学习记录。</p>
+</blockquote>
+
+                            
+                        </li>
+                        
+                        
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+            
+        
+        
+            </ul>
+        
+        <hr>
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2019/05/16/GList/">数据结构（六）：广义表</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/05/20/DataStructure_Tree/">数据结构（七）：树</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">评论</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2019/05/16/MatrixMulti/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2019/05/16/MatrixMulti/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//emous-github-io.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#similar_posts">Similar Posts</a></li>
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])');
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+            
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="mailto:devtsai@outlook.com" title="email"><i class="far fa-envelope-open" aria-hidden="true"></i></a>  
+            <a href="https://github.com/emous" title="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>  
+            <a href=" https://stackoverflow.com/users/9212741/anon" title="StackOverflow"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a>
+            <a href="https://Liang.blogspot.com/" title="Blogger"><i class="fab fa-blogger" aria-hidden="true"></i></a> 
+
+             
+             
+             
+              
+             
+            
+        </p>
+         <p class="text-center">
+            LiangLab 2022 |
+            Welcome You
+        </p>
+
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>

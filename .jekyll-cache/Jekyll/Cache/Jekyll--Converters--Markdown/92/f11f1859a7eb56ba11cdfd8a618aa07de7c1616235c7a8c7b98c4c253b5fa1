@@ -1,0 +1,6 @@
+I"�<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/SSH_logo.png" /></div>
+
+<p>自从我尝试使用<code class="language-plaintext highlighter-rouge">Public Key Authentication</code>登陆ssh，我本就应该做好要把SSH所有的rfc都看完的打算的，在本篇文章中我将尽可能详细地阐明我对<strong>密码学如何在ssh中使用</strong>的认识。:C</p>
+
+<p>按照<a href="https://tools.ietf.org/html/rfc4251">SSH协议架构</a>，标准将SSH分成三层：传输层协议、用户认证协议、连接协议。最底层的是传输层协议，它负责<strong>认证服务器</strong>，<strong>加密数据</strong>，<strong>确保数据完整性</strong>，虽然它运行在TCP之上，但其实它可以运行在<strong>任意可靠</strong>的数据流之上；第二次是用户认证协议，它负责<strong>认证使用者是否是ssh服务器的用户</strong>，<code class="language-plaintext highlighter-rouge">Public Key Authentication</code>登陆ssh就将在这一层实现；最上层是连接协议，它将把<strong>多路加密的通道</strong>转换成<strong>逻辑上的Channel</strong>。本文将主要描述前两层协议。</p>
+:ET

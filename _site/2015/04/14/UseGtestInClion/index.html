@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>在Clion中使用Google Test(gtest)进行程序测试</title>
+  <meta name="description"
+    content="我第一次接触到程序测试是在大学的时候，那个时候对于程序测试的概念特别模糊，一方面是因为对于能推出新产品的“开发”工作比较有热情，一方面也是因为大学时候与测试有关的课程老师授课的时候往往都没有相关的理论论述，取而代之的大多都是反复的一遍又一遍地让我们试错，实在是乏味。我开始理解测试，又或者说之所以有这篇文章，是因为...">
+  <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+
+  <link rel="stylesheet" href="/css/main.css ">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+  <link rel="canonical" href="http://localhost:4000/2015/04/14/UseGtestInClion/">
+  <link rel="alternate" type="application/rss+xml" title="LiangLab"
+    href="http://localhost:4000/feed.xml ">
+
+  
+  
+  <script>
+    // google analytics
+    (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-137230515-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+
+  
+  <script src="/demos/base/js/demo-made.js"></script>
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>在Clion中使用Google Test(gtest)进行程序测试 | LiangLab</title>
+<meta name="generator" content="Jekyll v4.2.2" />
+<meta property="og:title" content="在Clion中使用Google Test(gtest)进行程序测试" />
+<meta name="author" content="Anon" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="居然C++也有自己的测试框架。" />
+<meta property="og:description" content="居然C++也有自己的测试框架。" />
+<link rel="canonical" href="http://localhost:4000/2015/04/14/UseGtestInClion/" />
+<meta property="og:url" content="http://localhost:4000/2015/04/14/UseGtestInClion/" />
+<meta property="og:site_name" content="LiangLab" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2015-04-14T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="在Clion中使用Google Test(gtest)进行程序测试" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2015/04/14/UseGtestInClion/","author":{"@type":"Person","name":"Anon"},"@type":"BlogPosting","description":"居然C++也有自己的测试框架。","headline":"在Clion中使用Google Test(gtest)进行程序测试","dateModified":"2015-04-14T00:00:00+08:00","datePublished":"2015-04-14T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2015/04/14/UseGtestInClion/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+  <body style="background:white;">
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">LiangLab</a>
+
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>文章
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>博客
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>在Clion中使用Google Test(gtest)进行程序测试</h1>
+        <div>
+            <hr>
+        </div>
+
+
+
+
+        <div class="label">
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-calendar"></i>2015-04-14
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-user"></i>Anon
+                
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" >
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#测试" title="Category: 测试" rel="category">测试</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+        <!--a href="/tag/#%E6%B5%8B%E8%AF%95" title="Tag: 测试" rel="tag">测试</a-->
+        <a href="/tag/#测试" title="Tag: 测试" rel="tag">测试</a>&nbsp;
+    
+        <!--a href="/tag/#Webstorm" title="Tag: Webstorm" rel="tag">Webstorm</a-->
+        <a href="/tag/#Webstorm" title="Tag: Webstorm" rel="tag">Webstorm</a>&nbsp;
+    
+        <!--a href="/tag/#gtest" title="Tag: gtest" rel="tag">gtest</a-->
+        <a href="/tag/#gtest" title="Tag: gtest" rel="tag">gtest</a>&nbsp;
+    
+        <!--a href="/tag/#C%2B%2B" title="Tag: C++" rel="tag">C++</a-->
+        <a href="/tag/#C++" title="Tag: C++" rel="tag">C++</a>
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#c测试框架" id="markdown-toc-c测试框架">C++测试框架</a>    <ul>
+      <li><a href="#boost-test" id="markdown-toc-boost-test">Boost Test</a></li>
+      <li><a href="#google-test" id="markdown-toc-google-test">Google Test</a></li>
+      <li><a href="#catch" id="markdown-toc-catch">CATCH</a></li>
+    </ul>
+  </li>
+  <li><a href="#google-test-in-clion" id="markdown-toc-google-test-in-clion">Google Test in Clion</a></li>
+  <li><a href="#样例项目下载" id="markdown-toc-样例项目下载">样例项目下载</a></li>
+  <li><a href="#reference" id="markdown-toc-reference">Reference</a></li>
+</ul>
+
+<div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="/image/2019/04/14/bug_fixed.svg" /></div>
+
+<p>我第一次接触到<strong>程序测试</strong>是在大学的时候，那个时候对于程序测试的概念特别模糊，一方面是因为对于能推出新产品的“开发”工作比较有热情，一方面也是因为大学时候与测试有关的课程老师授课的时候往往都没有相关的理论论述，取而代之的大多都是反复的一遍又一遍地让我们试错，实在是乏味。</p>
+
+<p>我开始理解测试，又或者说之所以有这篇文章，是因为在某些特定的环境下，测试是一个<strong>特别值得独立出来的，能提高整体效率的工作流程</strong>。</p>
+<blockquote>
+  <p>那就是，一方面作品需要验证其准确性，一方面又不便因验证本身而大改项目的整体结构的时候。</p>
+</blockquote>
+
+<p>测试框架能良好的发挥其<strong>松散</strong>的，<strong>准确</strong>的，<strong>多入口</strong>的特性。将整个项目的工作流程调整成“需求-&gt;设计-&gt;开发-&gt;[测试-&gt;调试]多批次并行循环-&gt;发布”，能让整个工程变得简洁而有序，哪怕仅仅是团队仅仅是一个人。</p>
+
+<hr />
+
+<h2 id="c测试框架">C++测试框架</h2>
+
+<p>在Clion中为C++提供了三个主流的测试框架作为配置选项：<a href="https://www.boost.org/doc/libs/1_66_0/libs/test/doc/html/index.html">Boost.test</a>，<a href="https://github.com/catchorg/Catch2/blob/master/docs/limitations.md">Catch</a>，<a href="https://github.com/google/googletest">Google Test</a>。</p>
+
+<h3 id="boost-test">Boost Test<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup></h3>
+
+<p>Boost Test是一个很不错的选择，尤其是当你正在使用<code class="language-plaintext highlighter-rouge">Boost</code>的时候。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// TODO: Include your class to test here.</span>
+<span class="cp">#define BOOST_TEST_MODULE MyTest
+#include</span> <span class="cpf">&lt;boost/test/unit_test.hpp&gt;</span><span class="cp">
+</span>
+<span class="n">BOOST_AUTO_TEST_CASE</span><span class="p">(</span><span class="n">MyTestCase</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// To simplify this example test, let's suppose we'll test 'float'.</span>
+    <span class="c1">// Some test are stupid, but all should pass.</span>
+    <span class="kt">float</span> <span class="n">x</span> <span class="o">=</span> <span class="mf">9.5</span><span class="n">f</span><span class="p">;</span>
+
+    <span class="n">BOOST_CHECK</span><span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="n">f</span><span class="p">);</span>
+    <span class="n">BOOST_CHECK_EQUAL</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span><span class="n">x</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
+    <span class="n">BOOST_CHECK_CLOSE</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">9.5</span><span class="n">f</span><span class="p">,</span> <span class="mf">0.0001</span><span class="n">f</span><span class="p">);</span> <span class="c1">// Checks differ no more then 0.0001%</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+<p>它支持：</p>
+<ul>
+  <li><strong>自动</strong>或者手动测试注册</li>
+  <li>大量的断言</li>
+  <li>自动地对比<strong>collections</strong></li>
+  <li>多种多样的输出格式（包括<strong>XML</strong>）</li>
+  <li><strong>Fixtures</strong>/<strong>模板</strong></li>
+</ul>
+
+<h3 id="google-test">Google Test<sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">2</a></sup></h3>
+
+<p>Google Test（也被叫做Google C++ 测试框架）是一个较新的测试框架。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;gtest/gtest.h&gt;</span><span class="cp">
+</span>
+<span class="n">TEST</span><span class="p">(</span><span class="n">MyTestSuitName</span><span class="p">,</span> <span class="n">MyTestCaseName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">actual</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">EXPECT_GT</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="n">EXPECT_EQ</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">actual</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"Should be equal to one"</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>它的主要特性：</p>
+<ul>
+  <li><strong>便携</strong></li>
+  <li>提供致命和<strong>非致命</strong>的断言</li>
+  <li>可以给断言的输出提供简单的信息数据：<code class="language-plaintext highlighter-rouge">ASSERT_EQ(5, Foo(i)) &lt;&lt; " where i = " &lt;&lt; i;</code></li>
+  <li>Google Test可以<strong>自动地</strong>检测到你的测试任务所以你不需要枚举他们到列表中再运行</li>
+  <li>可以轻松地<strong>拓展</strong>你的断言的词汇</li>
+  <li><strong>Death tests</strong>（详情请见高级教程）</li>
+  <li>为子程序循环提供<code class="language-plaintext highlighter-rouge">SCOPED_TRACE</code></li>
+  <li>你可以决定<strong>运行哪一些测试任务</strong></li>
+  <li>生成<strong>XML</strong>形式的测试报告</li>
+  <li><strong>Fixtures</strong>/<strong>Mock</strong>/<strong>模板</strong></li>
+</ul>
+
+<h3 id="catch">CATCH<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">3</a></sup></h3>
+<ul>
+  <li>仅仅需要导入头文件</li>
+  <li>自动注册tests的方法和函数</li>
+  <li>将标准C++表达式分解到LHS和RHS（所以你不需要一套的断言宏）</li>
+  <li>Support for nested sections within a function based fixture</li>
+  <li>可以用自然语言为测试命名，相应的函数和方法将生成</li>
+  <li><a href="https://github.com/catchorg/Catch2/blob/master/docs/why-catch.md#top">更多</a></li>
+</ul>
+
+<h2 id="google-test-in-clion">Google Test in Clion</h2>
+
+<ol>
+  <li>创建新的C++ Executable项目。
+    <div style="text-align: center;"><img style="height:;width:100%;" alt="" title="" src="/image/2019/04/14/Snipaste_2019-04-14_20-17-57.png" /></div>
+  </li>
+  <li>将项目分为<strong>项目</strong>和<strong>测试</strong>目录，并在项目目录中添加<strong>头文件</strong>和<strong>源文件</strong>目录。为测试目录（<code class="language-plaintext highlighter-rouge">Test_DIR</code>）添加具体测试目录（<code class="language-plaintext highlighter-rouge">tests</code>），并为其添加<code class="language-plaintext highlighter-rouge">CMakeLists.txt</code>。之后将<a href="https://github.com/google/googletest">gtest源码</a>添加到测试lib目录（<code class="language-plaintext highlighter-rouge">Test_DIR/lib</code>）中并为测试目录添加<code class="language-plaintext highlighter-rouge">CMakeLists.txt</code>，并为项目添加源码。
+    <div style="text-align: center;"><img style="height:;width:40%;" alt="" title="" src="/image/2019/04/14/Snipaste_2019-04-14_20-39-45.png" /></div>
+  </li>
+  <li>
+    <p>编写根目录的CMakeLists，它有两个作用：程序的完整功能、将测试CMakeLists引入。</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> cmake_minimum_required(VERSION 3.13)
+ project(Test)
+    
+ set(CMAKE_CXX_STANDARD 14)
+    
+ #头文件目录
+ include_directories(Project_DIR/Header)
+    
+ #链接
+ add_executable(Test main.cpp Project_DIR/Source/IamAClass.cpp)
+    
+ #为项目引入测试功能
+ add_subdirectory(Test_DIR) 
+</code></pre></div>    </div>
+  </li>
+  <li>编写项目源码。
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">//</span>
+ <span class="c1">// Created by anon on 2019/4/14.</span>
+ <span class="c1">//</span>
+    
+ <span class="cp">#ifndef TEST_IAMACLASS_H
+</span> <span class="cp">#define TEST_IAMACLASS_H
+</span>    
+    
+ <span class="k">class</span> <span class="nc">IamAClass</span> <span class="p">{</span>
+ <span class="nl">public:</span>
+     <span class="kt">int</span> <span class="n">return_Zero</span><span class="p">();</span>
+ <span class="p">};</span>
+    
+    
+ <span class="cp">#endif //TEST_IAMACLASS_H
+</span>    
+</code></pre></div>    </div>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">//</span>
+ <span class="c1">// Created by anon on 2019/4/14.</span>
+ <span class="c1">//</span>
+    
+ <span class="cp">#include</span> <span class="cpf">"IamAClass.h"</span><span class="cp">
+</span>    
+ <span class="kt">int</span> <span class="n">IamAClass</span><span class="o">::</span><span class="n">return_Zero</span><span class="p">()</span> <span class="p">{</span>
+     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+ <span class="p">}</span>
+    
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>编写<code class="language-plaintext highlighter-rouge">Test_DIR/CMakeLists.txt</code>。</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> add_subdirectory(lib/googletest-master)
+ add_subdirectory(tests)
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>为<code class="language-plaintext highlighter-rouge">Test_DIR/tests/CMakeLists.txt</code>设置项目名称、链接文件、导入库文件，并为<code class="language-plaintext highlighter-rouge">tests</code>添加两个测试文件<code class="language-plaintext highlighter-rouge">testFILE_1.cpp</code>，<code class="language-plaintext highlighter-rouge">testFILE_2.cpp</code>。</p>
+
+    <p>CMakeLists.txt</p>
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> add_executable(run_actual_tests testFILE_1.cpp testFILE_2.cpp  ../../Project_DIR/Source/IamAClass.cpp)
+    
+ target_link_libraries(run_actual_tests gtest gtest_main)
+</code></pre></div>    </div>
+    <p>testFILE_1.cpp</p>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">//</span>
+ <span class="c1">// Created by anon on 2019/4/14.</span>
+ <span class="c1">//</span>
+    
+ <span class="cp">#include</span> <span class="cpf">"gtest/gtest.h"</span><span class="cp">
+</span> <span class="cp">#include</span> <span class="cpf">"IamAClass.h"</span><span class="cp">
+</span>    
+ <span class="k">namespace</span> <span class="p">{</span>
+     <span class="k">class</span> <span class="nc">TestClass</span><span class="o">:</span><span class="k">public</span> <span class="n">testing</span><span class="o">::</span><span class="n">Test</span><span class="p">{</span>
+     <span class="nl">public:</span>
+         <span class="n">IamAClass</span> <span class="n">test_IamClass_obj</span><span class="p">;</span>
+     <span class="p">};</span>
+ <span class="p">}</span>
+    
+ <span class="n">TEST_F</span><span class="p">(</span><span class="n">TestClass</span><span class="p">,</span><span class="n">Test_ReturnZeroMethod</span><span class="p">){</span>
+     <span class="n">ASSERT_EQ</span><span class="p">(</span><span class="n">test_IamClass_obj</span><span class="p">.</span><span class="n">return_Zero</span><span class="p">(),</span><span class="mi">0</span><span class="p">);</span>
+ <span class="p">}</span>
+    
+ <span class="n">TEST_F</span><span class="p">(</span><span class="n">TestClass</span><span class="p">,</span><span class="n">Test_ReturnZeroMethod_1</span><span class="p">){</span>
+     <span class="n">ASSERT_EQ</span><span class="p">(</span><span class="n">test_IamClass_obj</span><span class="p">.</span><span class="n">return_Zero</span><span class="p">(),</span><span class="mi">1</span><span class="p">);</span>
+ <span class="p">}</span>
+</code></pre></div>    </div>
+
+    <p>testFILE_2.cpp</p>
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">//</span>
+ <span class="c1">// Created by anon on 2019/4/14.</span>
+ <span class="c1">//</span>
+    
+ <span class="cp">#include</span> <span class="cpf">"gtest/gtest.h"</span><span class="cp">
+</span>    
+ <span class="n">TEST</span><span class="p">(</span><span class="n">SUITE_A</span><span class="p">,</span><span class="n">TEST_A</span><span class="p">){</span>
+     <span class="n">ASSERT_EQ</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+ <span class="p">}</span>
+ <span class="n">TEST</span><span class="p">(</span><span class="n">SUITE_A</span><span class="p">,</span><span class="n">TEST_B</span><span class="p">){</span>
+     <span class="n">ASSERT_EQ</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+ <span class="p">}</span>
+ <span class="n">TEST</span><span class="p">(</span><span class="n">SUITE_B</span><span class="p">,</span><span class="n">TEST_A</span><span class="p">){</span>
+     <span class="n">ASSERT_EQ</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+ <span class="p">}</span>
+ <span class="n">TEST</span><span class="p">(</span><span class="n">SUITE_B</span><span class="p">,</span><span class="n">TEST_B</span><span class="p">){</span>
+     <span class="n">ASSERT_EQ</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+ <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>编译运行target<code class="language-plaintext highlighter-rouge">run_actual_tests</code>（如果不存在这个配置选项，可以手动添加cmake类型）。
+    <div style="text-align: center;"><img style="height:;width:" alt="" title="" src="/image/2019/04/14/Snipaste_2019-04-14_21-26-31.png" /></div>
+  </li>
+  <li>使用Clion内置的Google Test配置工具，进行特定SUITE的测试。
+    <div style="text-align: center;"><img style="height:;width:" alt="" title="" src="/image/2019/04/14/Snipaste_2019-04-14_21-30-14.png" /></div>
+    <div style="text-align: center;"><img style="height:;width:" alt="" title="" src="/image/2019/04/14/Snipaste_2019-04-14_21-31-38.png" /></div>
+  </li>
+</ol>
+
+<h2 id="样例项目下载">样例项目下载</h2>
+
+<p><a href="https://github.com/eMous/GoogleTestClionExample.git">地址</a></p>
+
+<h2 id="reference">Reference</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p><a href="https://stackoverflow.com/questions/242926/comparison-of-c-unit-test-frameworks">StackOverflow@Wernight</a> <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p><a href="https://stackoverflow.com/questions/242926/comparison-of-c-unit-test-frameworks">StackOverflow@Wernight</a> <a href="#fnref:2" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+      <p><a href="https://stackoverflow.com/questions/242926/comparison-of-c-unit-test-frameworks">CATCH原作者：StackOverflow@philsquared</a> <a href="#fnref:3" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </article>
+        <br>
+        <div class="copyright">
+        <h4>文档信息</h4>
+        <ul>
+            <li>作者: 
+                
+                    Anon
+                
+                
+                
+                <a href="mailto:devtsai@outlook.com" title="devtsai@outlook.com"><i class="far fa-envelope-open" aria-hidden="true"></i></a> 
+                 
+            </li>
+            
+            
+            <li>发表日期： <abbr title="2015-04-14T00:00:00+08:00">
+                2015-04-14
+               </abbr></li>
+            <li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+            <li>若文章中存在事实上的错误，欢迎评论或与作者联系。</li>
+        </ul>
+</div>
+<style type="text/css">
+    .copyright{
+            margin-top:1em;
+            padding:1em;
+            border:1px solid #d3d3d3;
+            background-color:#DEEBF7;
+        }
+        
+        .copyright h4{
+            margin-top: 2px;
+            border-bottom:1px solid gray;
+            font-size:1.5em;
+            font-weight:bold;
+            color:#556677;
+        }
+        
+        .copyright ul{
+            padding-left:2em;
+            padding-right:2em;
+        }
+        
+        .copyright li{
+            color:#556677;
+        }
+</style>
+    
+        <hr>
+
+        
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+        
+        <hr>
+
+        <div class="post-recent">
+    <div class="pre">
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2015/05/01/SSH_connection/">重新认识SSH（二）</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">评论</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2015/04/14/UseGtestInClion/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2015/04/14/UseGtestInClion/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//emous-github-io.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])');
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+            
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="mailto:devtsai@outlook.com" title="email"><i class="far fa-envelope-open" aria-hidden="true"></i></a>  
+            <a href="https://github.com/emous" title="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>  
+            <a href=" https://stackoverflow.com/users/9212741/anon" title="StackOverflow"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a>
+            <a href="https://Liang.blogspot.com/" title="Blogger"><i class="fab fa-blogger" aria-hidden="true"></i></a> 
+
+             
+             
+             
+              
+             
+            
+        </p>
+         <p class="text-center">
+            LiangLab 2022 |
+            Welcome You
+        </p>
+
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>

@@ -1,0 +1,30 @@
+I"	<ul id="markdown-toc">
+  <li><a href="#这是一个开始" id="markdown-toc-这是一个开始">这是一个开始</a></li>
+</ul>
+
+<!-- 这是我的第一个代码显示脚本 -- <script>demo_js.EmbedDemo("89798dasoid")</script> -->
+
+<center><img alt="" title="" src="/image/2019/03/31/building_website.svg" /></center>
+
+<h2 id="这是一个开始">这是一个开始</h2>
+
+<p>由于<a href="https://caihuashuai.blogspot.com/">Blogger平台</a>对于<code class="language-plaintext highlighter-rouge">Markdown</code>以及相关的代码显示功能没有原生的支持，所以我决定自建站点用于记录我的计算机学习经历。</p>
+
+<p>再者，将类似于WordPress之类的博客系统在VPS或Cloud上部署会不可避免地随着时间的增长增大相关的维护成本——尤其是<strong>数据安全</strong>以及<strong>站点的可访问性</strong>相关的维护。所以就有了这里，部署在Github Page上的基于Jekyll的静态博客。</p>
+
+<p>我将会在这里记录我所有的IT大方向的学习经历，包括但不限于:</p>
+
+<ul>
+  <li>对学习方法本身的探讨</li>
+  <li>各端软件开发相关技术</li>
+  <li>IT范畴内相关原理的科普向解释</li>
+  <li>与查错、纠错相关的记录与探讨</li>
+  <li>程序语言本身的探讨</li>
+  <li>科技生活类的内容
+    <ul>
+      <li>操作系统下基于已有程序或自实现的各种问题的自动化方案</li>
+      <li>与实物或动手操作相关的科技产品或方案探讨</li>
+    </ul>
+  </li>
+</ul>
+:ET

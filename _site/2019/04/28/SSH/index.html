@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>重新认识SSH（一）</title>
+  <meta name="description"
+    content="自从我尝试使用Public Key Authentication登陆ssh，我本就应该做好要把SSH所有的rfc都看完的打算的，在本篇文章中我将尽可能详细地阐明我对密码学如何在ssh中使用的认识。:C按照SSH协议架构，标准将SSH分成三层：传输层协议、用户认证协议、连接协议。最底层的是传输层协议，它负责认证服务...">
+  <link rel="shortcut icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico?" type="image/x-icon">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_8v3czwksspqlg14i.css">
+
+  <link rel="stylesheet" href="/css/main.css ">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+  <link rel="canonical" href="http://localhost:4000/2019/04/28/SSH/">
+  <link rel="alternate" type="application/rss+xml" title="LiangLab"
+    href="http://localhost:4000/feed.xml ">
+
+  
+  
+  <script>
+    // google analytics
+    (function (i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date(); a = s.createElement(o),
+      m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-137230515-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+
+  
+  <script src="/demos/base/js/demo-made.js"></script>
+  <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>重新认识SSH（一） | LiangLab</title>
+<meta name="generator" content="Jekyll v4.2.2" />
+<meta property="og:title" content="重新认识SSH（一）" />
+<meta name="author" content="Anon" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="用rfc和wireshark学习理解openssh。" />
+<meta property="og:description" content="用rfc和wireshark学习理解openssh。" />
+<link rel="canonical" href="http://localhost:4000/2019/04/28/SSH/" />
+<meta property="og:url" content="http://localhost:4000/2019/04/28/SSH/" />
+<meta property="og:site_name" content="LiangLab" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-04-28T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="重新认识SSH（一）" />
+<script type="application/ld+json">
+{"url":"http://localhost:4000/2019/04/28/SSH/","author":{"@type":"Person","name":"Anon"},"@type":"BlogPosting","description":"用rfc和wireshark学习理解openssh。","headline":"重新认识SSH（一）","dateModified":"2019-04-28T00:00:00+08:00","datePublished":"2019-04-28T00:00:00+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2019/04/28/SSH/"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+  <body style="background:white;">
+
+    <header id="top">
+    <div class="wrapper">
+        <a href="/" class="brand">LiangLab</a>
+
+        <button id="headerMenu" class="menu"><i class="fa fa-bars"></i></button>
+        <nav id="headerNav">
+            <ul>
+                <li>
+                    
+                    <a href="/">
+                    
+                        <i class="fa fa-home"></i>Home
+                    </a>
+                </li>
+
+                
+                    
+                    <li>
+                        
+                        <a href="/archive/">
+                        
+                            <i class="fa fa-archive"></i>文章
+                        </a>
+                    </li>
+                    
+                
+                    
+                    <li>
+                        
+                        <a href="/category/">
+                        
+                            <i class="fa fa-th-list"></i>博客
+                        </a>
+                    </li>
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+        <div class="page clearfix" post>
+    <div class="left">
+        <h1>重新认识SSH（一）</h1>
+        <div>
+            <hr>
+        </div>
+
+
+
+
+        <div class="label">
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-calendar"></i>2019-04-28
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                <i class="fa fa-user"></i>Anon
+                
+            </div>
+
+            <div class="label-card" style="color:#6b6a6a">
+                
+            </div>
+
+            <div class="label-card" >
+            
+
+
+<!-- <span class="point">•</span> -->
+<span class="categories">
+  <i class="fa fa-th-list"></i>
+  
+    
+        <a href="/category/#SSH" title="Category: SSH" rel="category">SSH</a>
+    
+  
+
+  <!-- <span class="point">•</span> -->
+</span>
+
+
+            </div>
+
+            <div class="label-card">
+            
+<!-- <span class="point">•</span> -->
+<span class="pageTag">
+  <i class="fa fa-tags"></i>
+  
+    
+        <!--a href="/tag/#%E5%AF%86%E7%A0%81%E5%AD%A6" title="Tag: 密码学" rel="tag">密码学</a-->
+        <a href="/tag/#密码学" title="Tag: 密码学" rel="tag">密码学</a>&nbsp;
+    
+        <!--a href="/tag/#rfc" title="Tag: rfc" rel="tag">rfc</a-->
+        <a href="/tag/#rfc" title="Tag: rfc" rel="tag">rfc</a>&nbsp;
+    
+        <!--a href="/tag/#%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE" title="Tag: 网络协议" rel="tag">网络协议</a-->
+        <a href="/tag/#网络协议" title="Tag: 网络协议" rel="tag">网络协议</a>
+    
+  
+
+</span>
+
+            </div>
+
+        </div>
+        <hr>
+        <article itemscope itemtype="http://schema.org/BlogPosting">
+        <ul id="markdown-toc">
+  <li><a href="#环境介绍" id="markdown-toc-环境介绍">环境介绍</a></li>
+  <li><a href="#版本交换" id="markdown-toc-版本交换">版本交换</a></li>
+  <li><a href="#二进制包协议" id="markdown-toc-二进制包协议">二进制包协议</a></li>
+  <li><a href="#密钥交换" id="markdown-toc-密钥交换">密钥交换</a>    <ul>
+      <li><a href="#dh" id="markdown-toc-dh">DH</a></li>
+      <li><a href="#ecdh" id="markdown-toc-ecdh">ECDH</a></li>
+      <li><a href="#curve25519" id="markdown-toc-curve25519">curve25519</a></li>
+    </ul>
+  </li>
+  <li><a href="#服务端认证" id="markdown-toc-服务端认证">服务端认证</a></li>
+  <li><a href="#客户端认证" id="markdown-toc-客户端认证">客户端认证</a>    <ul>
+      <li><a href="#扩展协商" id="markdown-toc-扩展协商">扩展协商</a>        <ul>
+          <li><a href="#server-sig-algs" id="markdown-toc-server-sig-algs">server-sig-algs</a></li>
+          <li><a href="#delay-compression" id="markdown-toc-delay-compression">delay-compression</a></li>
+          <li><a href="#no-flow_control" id="markdown-toc-no-flow_control">no-flow_control</a></li>
+          <li><a href="#elevation" id="markdown-toc-elevation">elevation</a></li>
+        </ul>
+      </li>
+      <li><a href="#公钥认证" id="markdown-toc-公钥认证">公钥认证</a>        <ul>
+          <li><a href="#公钥类型" id="markdown-toc-公钥类型">公钥类型</a></li>
+          <li><a href="#publickkey公钥认证方法" id="markdown-toc-publickkey公钥认证方法">publickkey公钥认证方法</a></li>
+          <li><a href="#rsa-sha2-256" id="markdown-toc-rsa-sha2-256">rsa-sha2-256</a></li>
+          <li><a href="#traffic-analysis" id="markdown-toc-traffic-analysis">traffic analysis</a></li>
+        </ul>
+      </li>
+      <li><a href="#密码认证" id="markdown-toc-密码认证">密码认证</a></li>
+      <li><a href="#host-based认证" id="markdown-toc-host-based认证">Host-Based认证</a></li>
+      <li><a href="#keyboard-interactive认证" id="markdown-toc-keyboard-interactive认证">keyboard-interactive认证</a></li>
+    </ul>
+  </li>
+  <li><a href="#小结" id="markdown-toc-小结">小结</a></li>
+  <li><a href="#reference" id="markdown-toc-reference">Reference</a></li>
+</ul>
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/SSH_logo.png" /></div>
+
+<p>自从我尝试使用<code class="language-plaintext highlighter-rouge">Public Key Authentication</code>登陆ssh，我本就应该做好要把SSH所有的rfc都看完的打算的，在本篇文章中我将尽可能详细地阐明我对<strong>密码学如何在ssh中使用</strong>的认识。:C</p>
+
+<p>按照<a href="https://tools.ietf.org/html/rfc4251">SSH协议架构</a>，标准将SSH分成三层：传输层协议、用户认证协议、连接协议。最底层的是传输层协议，它负责<strong>认证服务器</strong>，<strong>加密数据</strong>，<strong>确保数据完整性</strong>，虽然它运行在TCP之上，但其实它可以运行在<strong>任意可靠</strong>的数据流之上；第二次是用户认证协议，它负责<strong>认证使用者是否是ssh服务器的用户</strong>，<code class="language-plaintext highlighter-rouge">Public Key Authentication</code>登陆ssh就将在这一层实现；最上层是连接协议，它将把<strong>多路加密的通道</strong>转换成<strong>逻辑上的Channel</strong>。本文将主要描述前两层协议。</p>
+
+<hr />
+
+<h2 id="环境介绍">环境介绍</h2>
+
+<p>我的Host机器是使用<code class="language-plaintext highlighter-rouge">OpenSSH_7.4p1</code>的 CentOS 7,而Client机是使用<code class="language-plaintext highlighter-rouge">OpenSS_7.9p1</code>的macOS，因此我会尽可能的使用新的SSH标准进行阐述。</p>
+
+<h2 id="版本交换">版本交换</h2>
+
+<p>下图是我使用wireshark抓取到的SSH登陆过程中往返的数据包，</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/wireshark.png" /></div>
+
+<p>可以发现，最开始的由客户端发起的一个往返数据包，它用于交换客户端和服务器SSH版本信息。其中第一个数字，是SSH版本信息，第二个则是软件版本信息。关于服务器和客户端版本不匹配的问题，如果是服务器则可以设置兼容模式（enables compatibility）来自动应对低版本的客户端，而客户端遇到低版本的服务器必须断开连接后手动切换版本（这是因为协议没有约束客户端必须等到服务器的回应再发出命令，这就意味着可能客户端会先发出其他命令从而把旧的协议占用）。</p>
+
+<h2 id="二进制包协议">二进制包协议</h2>
+
+<p>大概率是因为要解决<strong>TCP粘包</strong>以及<strong>长度整除密钥方便处理</strong>的问题，在版本交换后SSH都必须以<strong>二进制包协议</strong>的格式进行传输。</p>
+
+<pre>
+                                  payload
+                 [byte[packet_length - padding_length - 1]]
+                                     ^
+                                     |
+       packet_length                 |             mac (Message Authentication Code - MAC)
+          [uint32]                   |                        [byte[mac_length]]
+             ^                       |                                ^
+             |                       |                                |
+             |                       |                                |
++-------+--------------------------------------------------------------------+
+|       |    |                       |   ssh                          |      |
+|       | +-----+---+--------------------------------+----------+----------+ |
+|       | |  |  |   |                |               |          |     |    | |
+|       | |  |  |   |                |               |          |     |    | |
+|  tcp  | |  |  |   |                |               |          |     |    | |
+|       | |  +  | + |                +               |    +     |     +    | |
+|       | |     | | |                                |    |     |          | |
+|       | |     | | |                                |    |     |          | |
+|       | +----------------------------------------------------------------+ |
++-------+--------------------------------------------------------------------+
+                  |                                       |
+                  |                                       |
+                  |                                       |
+                  v                                       v
+               [byte]                           [byte[padding_length]]
+            padding_length                          random padding
+
+</pre>
+<p>其中<code class="language-plaintext highlighter-rouge">random padding</code>用于补全长度，<code class="language-plaintext highlighter-rouge">payload</code>为有效负载，<code class="language-plaintext highlighter-rouge">mac </code>为消息认证码。所以单个packet是有最大长度的，未压缩的包大小必须小于35000字节。</p>
+
+<p>若压缩算法协商成功，<strong>payload</strong>区域将被压缩，<strong>packet_length</strong>、<strong>mac</strong>区域将被重新计算。<strong>加密将在压缩之后执行。</strong></p>
+
+<p>在密钥交换成功之后，一个加密密钥将会被计算出来。之后，<strong>packet length</strong>、<strong>padding length</strong>、<strong>payload</strong>、<strong>random padding</strong>将必须被加密。同时，两个方向的加密算法可以被允许是不相同的。</p>
+
+<p>当密钥交换完毕后，会有一个<strong>消息认证码算法</strong>被协商出，这是一个给定输出长度mac的摘要算法MAC，之后运算 <code class="language-plaintext highlighter-rouge">mac = MAC(shared secret, packet sequence number, entire unencrpyted packet without 'mac')</code>。packet sequence number是一个隐性的数字，它从第一个packet开始以0计算，每2^32次后又重新开始，不受<code class="language-plaintext highlighter-rouge">密钥再协商</code>协议的影响。由于<code class="language-plaintext highlighter-rouge">shared secret</code>只有双方知晓，且双方都能认证对方（或者，在shell登陆前server并不需要对client进行认证）因此可以确保这个消息并不来自于第三方；由于<code class="language-plaintext highlighter-rouge">packet sequence number</code>是同步于双方的，因此确保这个消息是有序的；最后再把完整的未加密packet放在一起运算，可以保证消息的完整性。</p>
+
+<h2 id="密钥交换">密钥交换</h2>
+
+<p>密钥交换(Key Exchange)是SSH中紧接着的第二步，它最直接的目的有两个：<strong>用一个安全的方式将接下来的packet加密密钥传到双方手中</strong>、<strong>让客户端相信“同时获得密钥的另一个人”就是千真万确的服务器</strong>。</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/key_exchange.png" /></div>
+
+<p>第一步，客户端在payload中表明<code class="language-plaintext highlighter-rouge">Message Code = 20(Key Exchange Init)</code>,并毫无保留的把自己支持的各种加密算法告诉服务器，同时猜测服务器支持哪些算法。需要提供的算法类型（算法用途）有<strong>密钥交换算法</strong>，<strong>用于认证服务器的公钥属于什么公钥算法</strong>，<strong>客户端-&gt;服务端的数据加密使用什么算法</strong>，<strong>服务端-&gt;客户端的数据加密使用什么算法</strong>，<strong>客户端-&gt;服务端的数据使用什么MAC算法</strong>，<strong>服务端-&gt;客户端的数据使用什么MAC算法</strong>，<strong>客户端-&gt;服务端的数据使用什么压缩算法</strong>，<strong>服务端-&gt;客户端的数据使用什么压缩算法</strong>。同时还要提供和估测，客户端到服务端的数据使用何种语言，服务端到客户端的数据使用何种语言；first_kex_packet_follows表示是否要先在服务器提供他的列表并得出协商结果前直接尝试一次客户端自己猜测的交换算法，如果设为true，客户端会在收到消息之前就发出初始化交换算法的请求，如果猜错了服务端会直接无视；一个<strong>随机数cookie</strong>（它将被用来生成session_id,同时确保双方中的任意一方没有完全的能力控制其初始化的结果）；一个暂未定义的数据项。</p>
+
+<p>第二部，服务端把自己的算法列表公布给客户端。同时双方根据某种约定好的协商机制（大体上就是，选双方都有的，选第一个），再之后就由客户端开始双方协商好的密钥交换算法。</p>
+
+<p>进行完密钥交换算法后，双方都一定会得到两个输出结果：</p>
+
+<ol>
+  <li>一个<strong>仅（它甚至都不曾在链路中出现）</strong>共享在双方间的秘密（shared secret）K。</li>
+  <li>一个交换摘要（exchange hash）H，并且约定在第一次密钥交换中得到的H即为<strong>session_id</strong>（它能唯一确定当前的连接）它被用来标记一个真正拥有服务端私钥的证据。</li>
+</ol>
+
+<p>最后双方协商，通过这两个数据和一些约定的公共数据（硬编码在协议里），使用<strong>密钥交换摘要算法</strong>生成各上述的用作各种用途的确切密钥。</p>
+
+<h3 id="dh">DH</h3>
+
+<p>DH(Diffie-Hellman Key Exchange)算法是历史上的第一个密钥交换算法，只有双方都参与才能生成shared secret。同时，交换完成时它将从服务器返回3个数据。</p>
+
+<ol>
+  <li>host key</li>
+  <li>f</li>
+  <li>signature of HASH(client_id,server_id,payload of client’s SSH_MSG_KEXINIT,payload of server’s SSH_MSG_KEXINIT,<strong>host_key</strong>, e, f, K)</li>
+</ol>
+
+<p>通过，df算法可以将客户端提供的<code class="language-plaintext highlighter-rouge">e</code>和服务端提供的<code class="language-plaintext highlighter-rouge">f</code>再配合之前获取的<code class="language-plaintext highlighter-rouge">GROUP</code>生成秘密的shared_secret K。因此如果在HASH中有<code class="language-plaintext highlighter-rouge">host_key</code>和<code class="language-plaintext highlighter-rouge">K</code>同时作为参数，若hash匹配则能证明host key确实是协商者提供的，再之后则只需要验证host_key的确有来自于<strong>host</strong>的权威性就行了。</p>
+
+<p>下图是DH交换算法在SSH协议中的流程（KEXINIT）。</p>
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/sshtrans.jpg" /></div>
+
+<h3 id="ecdh">ECDH</h3>
+
+<p>ECDH(Elliptic Curve Diffie Hellman)椭圆曲线DH，它是基于ECC的交换算法。对于交换算法本身而言，它和DH类似，它需要提供的协商的参数包括<code class="language-plaintext highlighter-rouge">(p,a,b,G,n,h) </code>。</p>
+
+<p>它的一般交换流程如下：</p>
+
+<pre>
+      Client                                                Server
+      ------                                                ------
+      Generate ephemeral key pair.
+      SSH_MSG_KEX_ECDH_INIT  --------------&gt;
+
+                                      Verify received key is valid.
+                                       Generate ephemeral key pair.
+                                             Compute shared secret.
+                                   Generate and sign exchange hash.
+                             &lt;------------- SSH_MSG_KEX_ECDH_REPLY
+
+</pre>
+<p>可以发现，有一些步骤对于它而言是必须的：~<del>协商公共参数</del>~，生成各自的keypair并提交公钥，各自验证对方提供的公钥。</p>
+
+<h3 id="curve25519">curve25519</h3>
+
+<p>也是机缘巧合，因为我的机器就使用的是这个算法（其实也是因为更新的rfc强制要求默认使用这个算法）。</p>
+<blockquote>
+  <p>A new set of Elliptic Curve Diffie-Hellman ssh-curves exist.  The
+   curve25519-sha256 MUST be adopted where possible.</p>
+</blockquote>
+
+<p>我发现wireshark抓包后，尽然直截了当的仅仅不可思议的两步就完成了密钥交换：</p>
+
+<ol>
+  <li>客户端提供<code class="language-plaintext highlighter-rouge">e</code></li>
+  <li>服务器提供<code class="language-plaintext highlighter-rouge">f</code></li>
+</ol>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/curve25519.png" /></div>
+
+<p>一直很纳闷那之前说的那个<code class="language-plaintext highlighter-rouge">g</code>去哪了？还有那些要协商的各种参数又去哪了？怎么你来我往一下直接就生成shared secret了？</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/curve25519_1.png" /></div>
+
+<p>但其实并不是，他们都”pre install”了，作者找到了一个很Special但并不可疑的特定的曲线curve25519，在这个曲线中<code class="language-plaintext highlighter-rouge">g[32] = {9}</code>。因此，使用他，DH的流程可以更加简化。</p>
+
+<pre>
+Client                                                            Server
+------                                                            ------
+Generate ephemeral key pair.
+SSH_MSG_KEX_ECDH_INIT          --------&gt;                      
+                                            Verify that client public key 
+                                            length is 32 bytes.
+                                             Generate ephemeral key pair.
+                                                   Compute shared secret.
+                                         Generate and sign exchange hash.
+                               &lt;--------           SSH_MSG_KEX_ECDH_REPLY
+Verify that server public key length is 32 bytes.
+* Verify host keys belong to server.
+Compute shared secret.
+Generate exchange hash.
+Verify server's signature.
+</pre>
+
+<p>其作者在论文中写到，这个算法有着<strong>极致的速度</strong>、<strong>免疫timing attack</strong>、<strong>提供短的secret keys</strong>、<strong>只需要32字节的public key</strong>、<strong>只要32字节的输入都是合法的，不需要验证</strong>、<strong>程序代码简短</strong>的优点。</p>
+
+<h2 id="服务端认证">服务端认证</h2>
+
+<p>诚如SSH RFC所说，由于SSH早于TSL问世，哪怕它已经解决了可绝大多数<code class="language-plaintext highlighter-rouge">telnet</code>会遇到的安全问题，它依旧面对一些情况依旧会遇到安全隐患。比如，初次建立SSH连接时可能会遇到的<code class="language-plaintext highlighter-rouge">中间人攻击</code>：</p>
+
+<blockquote>
+  <p>The protocol provides the option that the server name - host key
+   association is not checked when connecting to the host for the first
+   time.  This allows communication without prior communication of host
+   keys or certification.  The connection still provides protection
+   against passive listening; however, it becomes vulnerable to active
+   man-in-the-middle attacks.  Implementations SHOULD NOT normally allow
+   such connections by default, as they pose a potential security
+   problem.  However, as there is no widely deployed key infrastructure
+   available on the Internet at the time of this writing, this option
+   makes the protocol much more usable during the transition time until
+   such an infrastructure emerges, while still providing a much higher
+   level of security than that offered by older solutions (e.g., telnet
+   <a href="https://tools.ietf.org/html/rfc0854">RFC0854</a> and rlogin <a href="https://tools.ietf.org/html/rfc1282">RFC1282</a>).</p>
+</blockquote>
+
+<p>然而，绝大多数情况SSH还是可以提供安全可靠的服务端认证的。</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/server_auth.png" /></div>
+
+<p><strong>摘要</strong>具体格式如下（DH）：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The hash H is computed as the HASH hash of the concatenation of the following:
+      string    V_C, the client's identification string (CR and LF
+                excluded)
+      string    V_S, the server's identification string (CR and LF
+                excluded)
+      string    I_C, the payload of the client's SSH_MSG_KEXINIT
+      string    I_S, the payload of the server's SSH_MSG_KEXINIT
+      string    K_S, the host key
+      mpint     e, exchange value sent by the client
+      mpint     f, exchange value sent by the server
+      mpint     K, the shared secret
+</code></pre></div></div>
+<p>所以说，<code class="language-plaintext highlighter-rouge">MITM</code>只可能发生在第一次认证服务器的时候，这个时候客户端或许不能确认host key的真实身份。而之后，host key一定是被保障的，中间人也一定无法用被保障的private key签名。（其实也是存在一种可能的，就是某个受信任的host充当中间人的角色），引用一段我觉得很精彩的<a href="https://security.stackexchange.com/questions/39608/if-a-mitm-has-your-public-key-and-you-are-ssh-ing-through-the-mitm-what-is-the">论述</a>：</p>
+
+<blockquote>
+  <p>All of this relies on the magic of asymmetric cryptography:
+    You can verify a signature with the public key, but producing new signatures requires knowledge of the private key, and the private key cannot be (practically) deduced from the public key.
+    The DH key exchange consists in publicly exchanged messages, sender and receiver finally agree on a “shared secret” obtained by processing these messages, and yet someone observing only these messages cannot recompute the same secret.
+    Mathematics are involved.        @Thomas Pornin</p>
+</blockquote>
+
+<h2 id="客户端认证">客户端认证</h2>
+
+<p>认证完服务器后，紧接着客户端就会发送一个New key(SSH_MSG_NEWKEYS21)表明接下来要使用对称加密进行通信了。之后，wireshark就无法抓取到可读包裹了，只能通过<code class="language-plaintext highlighter-rouge">ssh -vvv</code>选项学习理解。</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/SSH/client_auth.png" /></div>
+
+<h3 id="扩展协商">扩展协商</h3>
+
+<p>在讨论客户端认证流程之前必须提及2018年4月更新的关于<code class="language-plaintext highlighter-rouge">扩展协商</code>的相关标准，它提供了一种机制去帮助客户端和服务器在密钥交换完成之后，秘密地交换各自的扩展。这个标准制定的主要原因，是因为<strong>SSH在原本的设计中没有一个良好的机制去确认服务端支持何种公钥认证机制，尤其是当RSA with SHA-256、SHA-512被广泛使用以后</strong>，如果没有一个良好的扩展协商机制，就无法避免客户端再认证时候的尝试与错误，以及认证错误的惩罚。</p>
+
+<p>标准规定，支持扩展协商的客户端和服务端可以在<code class="language-plaintext highlighter-rouge">密钥交换初始化</code>过程中，将自己<strong>支持扩展交换</strong>这个机制以一种<strong>加密算法</strong>的形式写如各自的算法列表（如果他们希望知道对方的扩展）。</p>
+
+<ul>
+  <li>服务端写入<code class="language-plaintext highlighter-rouge">ext-info-s</code></li>
+  <li>客户端写入<code class="language-plaintext highlighter-rouge">ext-info-c</code></li>
+</ul>
+
+<p>这样做有两个好处：</p>
+
+<ol>
+  <li>可以知道对方是否支持<code class="language-plaintext highlighter-rouge">扩展协商</code></li>
+  <li>而这个<code class="language-plaintext highlighter-rouge">扩展协商</code>因为双方各自表示的不同，自然地不可能被当作加密算法被使用。</li>
+</ol>
+
+<p>同时，双方一旦标注<strong>自己支持扩展协商</strong>，就必须做好被对方使用<code class="language-plaintext highlighter-rouge">SSH_MSG_EXT_INFO </code>packet告知其扩展信息的准备。同时，这个<strong>告知对方自身扩展信息</strong>的<code class="language-plaintext highlighter-rouge">SSH_MSG_EXT_INFO </code>packet，对使用顺序有明确的规定。
+如果由客户端发送自身扩展信息则必须满足一个条件：</p>
+<ol>
+  <li>这个packet是紧接着客户端的<code class="language-plaintext highlighter-rouge">SSH_MSG_NEWKEYS</code>发送的。</li>
+</ol>
+
+<p>如果由服务端发送自身扩展信息则必须满足以下任意一个条件：</p>
+<ol>
+  <li>
+    <p>这个packet是紧接着服务端的<code class="language-plaintext highlighter-rouge">SSH_MSG_NEWKEYS</code>的。 因为客户端需要这个扩展信息来进行认证处理，所以它应该尽可能快的发送过去（紧接着<code class="language-plaintext highlighter-rouge">SSH_MSG_NEWKEYS</code>）.</p>
+
+    <p>但是客户端不能指望必须有这个消息，因为服务端发送这个消息并不是被要求的。同时，由于网络延迟，客户端可能已经请求了<code class="language-plaintext highlighter-rouge">SSH_MSG_SERVICE_REQUEST</code>，并开启了之后的认证协议的过程，但是如果及时送达，那客户端就可以在这个基础上进行认证。</p>
+  </li>
+  <li>
+    <p>在准备发送服务端的<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>之前立马发送。</p>
+
+    <p>这是服务器第二次发送的机会，不论它是否在条件1发送过。标注了<code class="language-plaintext highlighter-rouge">ext-info-c</code>的客户端都必须接受服务端的<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>不论是来自于哪一个条件的发送，但是客户端不准期待（要求）服务器总是会发送它（可能服务器并不支持这个扩展交换的标准）。</p>
+
+    <p>这使得服务器可以发送一些不愿意公布给未认证的客户端的扩展信息。如果，服务器发送了第二种情况的<code class="language-plaintext highlighter-rouge">SSH_MSG_EXT_INFO</code>，它将取代所有的第一次发送的扩展，服务器和客户端需要重新计算使得扩展生效。服务器的第二次发送，同样匹配客户端的第一次发送。</p>
+
+    <p>标准决定第二次发送在这样的时机下是由于以下的原因：如果这个消息过早得发送，服务器无法保留住必要的信息在客户端被认证之前。如果它稍晚德发送，确实需要这个第二次信息地客户端在他被认证之后将没有一个可靠的方法去知道是否要期待（等待）这个消息。扩展的生效时间需要被明确指出，而扩展必须和其陈列的顺序无关。</p>
+  </li>
+</ol>
+
+<h4 id="server-sig-algs">server-sig-algs</h4>
+
+<p>这个扩展只允许存在在服务端中，它包含<strong>服务端支持的所有公钥认证算法列表</strong>，早期的一些SSH服务器或许没有提供<strong>所有</strong>的算法。</p>
+
+<p>一个希望使用公钥认证的客户端<strong>或许</strong>可以等待来自服务端的<code class="language-plaintext highlighter-rouge">SSH_MSG_EXT_INFO</code>,这样他就能提交合适的公钥，而不是试错。同时，支持了公钥认证的SSH服务器<strong>应该</strong>支持这一扩展。</p>
+
+<p>如果客户端没有发送这个扩展，客户端<strong>不准</strong>做出服务端支持任何算法的假设，而是应该试错，同时这些实现必须知道他们提供错误的公钥算法的公钥进行认证会受到惩罚。</p>
+
+<p>认证惩罚由服务器发出，用来阻止<code class="language-plaintext highlighter-rouge">暴力密码猜测</code>、<code class="language-plaintext highlighter-rouge">用户名枚举</code>和一些其他的被程序实现者或服务器管理员认为有嫌疑的行为类型。惩罚或许会包括<code class="language-plaintext highlighter-rouge">IP限流或制止</code>，这些惩罚或许会触发服务器的<code class="language-plaintext highlighter-rouge">邮件提醒</code>或<code class="language-plaintext highlighter-rouge">审计记录</code>。</p>
+
+<h4 id="delay-compression">delay-compression</h4>
+
+<p>它的extension-value包含两个算法列表：c-&gt;s的列表和s-&gt;c的列表。这个扩展的意义在于，它允许客户端和服务端直接的协商压缩算法，而不需要发起一个<code class="language-plaintext highlighter-rouge">key re-exchange</code>。</p>
+
+<p>这个扩展只有在双方都发送的时候才生效，名称列表<strong>或许</strong>会包含在算法协商时可以被采纳的算法，除了那些自定义的算法（因此只允许标准定义的算法）。比如说：’zlib,none’时一个符合规范的名称列表，但是’zlib@openssh.com’却不是。</p>
+
+<p>如果双方都发送了这个扩展，且找不到共同的算法，则使用如同协商失败一样的方式断开连接。如果生效，则在每一端的<code class="language-plaintext highlighter-rouge">触发消息</code>之后都将使用新的压缩算法：</p>
+<ol>
+  <li>来自服务端方向的packet，在发送<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>之后。</li>
+  <li>来自客户端方向的packet，在<code class="language-plaintext highlighter-rouge">SSH_MSG_NEWCOMPRESS</code>之后。</li>
+</ol>
+
+<p>如果扩展生效，客户端<strong>必须</strong>在收到<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>后的合理数目的发出消息后发送<code class="language-plaintext highlighter-rouge">SSH_MSG_NEWCOMPRESS</code>消息，它并不要求是之后的第一个消息。</p>
+
+<p>这样做的原因是为了避免触发<code class="language-plaintext highlighter-rouge">race condition(竞争条件)</code>——服务器无法可靠的知道来自客户端的消息是它收到<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>之前或是之后的。比如在登陆期间，客户端可能会发送<code class="language-plaintext highlighter-rouge">keep-alive</code>消息。和其他的扩展一样，除非另有说明，服务器会直到第二次发送<code class="language-plaintext highlighter-rouge">SSH_MSG_EXT_INFO</code>并且在发送<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>之前才启用扩展。这也使得服务端可以避免在客户端被认证前花费算力使用压缩。</p>
+
+<p>当各方重新协商压缩算法且又正在使用这一扩展时，如果重新协商的压缩算法在一个或连两个方向上没有改变，一旦重新协商的算法生效，内部的<code class="language-plaintext highlighter-rouge">压缩状态</code>也必须在每个方向上被重置。</p>
+
+<p>由于这个扩展的时间区间可能会和<code class="language-plaintext highlighter-rouge">Key Re-Exchange</code>发生冲突，标准做出规定<strong>对于已经声明扩展，或将要声明扩展</strong>的一方<strong>禁止</strong>初始化<code class="language-plaintext highlighter-rouge">Key Re-Exchange</code>直到下面的情况有一项满足：</p>
+<ol>
+  <li>扩展已经协商完成，并且这希望开始rekey的一方已经发送了它的上文所述的trigger message。</li>
+  <li>这一方（如果是服务器）已经发送或者（如果是客户端）接收了<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>且扩展没有协商成功。</li>
+</ol>
+
+<h4 id="no-flow_control">no-flow_control</h4>
+
+<p>这个扩展有两个值可选：’p’代表推荐的，’s’表示支持的。它只有在双方都提供扩展且至少有一方为’p’时才生效。</p>
+
+<p>如果扩展生效，在<code class="language-plaintext highlighter-rouge">SSH_MSG_CHANNEL_OPEN</code>和<code class="language-plaintext highlighter-rouge">SSH_MSG_CHANNEL_OPEN_CONFIRMATION</code>packets的<code class="language-plaintext highlighter-rouge">initial window size</code>区域将被认为是无意义的，频道将被视作所有的窗口大小都是无穷大的。同时所有接收到的<code class="language-plaintext highlighter-rouge">SSH_MSG_CHANNEL_WINDOW_ADJUST</code>消息也都将被忽略。</p>
+
+<p>这个扩展是为（但不局限于）文件传输应用而设计的，它们只准备使用一个频道，对于他们而言SSH提供的<code class="language-plaintext highlighter-rouge">流控</code>并不是一个功能而是一个阻碍。如果这个扩展生效，实现<strong>必须</strong>阻止打开超过一个同时的频道，但服务器应该支持客户端打开不止一个非同时的频道。</p>
+
+<p>标准推荐优先实现这一扩展，在没有这一扩展之前一些应用都会选择不实现流控，而是通过发送一个初始大小为2^32-1字节的频道窗口，标准不建议再这么做因为：</p>
+<ol>
+  <li>当传输超过2^32字节的时候是合理的，但是如果另一端实现SSH流控，那么这一端的服务将被挂起。</li>
+  <li>这样的实现无法处理大尺寸的频道窗口，而且它会出现不优雅的行为，包括断开连接。</li>
+</ol>
+
+<h4 id="elevation">elevation</h4>
+
+<p><code class="language-plaintext highlighter-rouge">elevation</code>（提升）或者<code class="language-plaintext highlighter-rouge">elevated</code>指的是一种操作系统的机制，这种机制使得管理员登陆的会话可以关联到两个安全上下文：一个受限和一个拥有管理员权限。提升会话就是启用完全的管理员权限（这是Windows的一个机制: <a href="https://tools.ietf.org/html/rfc8308#ref-WINADMIN">WINADMIN</a> 和 <a href="https://tools.ietf.org/html/rfc8308#ref-WINTOKEN">WINTOKEN</a>）。</p>
+
+<p>该扩展提供三个选项,’y’、’n’、’d’分别表示提升、不提升、由服务器决定。设计这个扩展的好处是，这可以减少提供SSH登录的Windows服务器的受攻击表面。对于不支持此扩展的客户端，服务端必须提升会话以确保一登录就有完全的管理员权限，否则可以随时提升会话只要客户端发出该请求。</p>
+
+<h3 id="公钥认证">公钥认证</h3>
+
+<h4 id="公钥类型">公钥类型</h4>
+
+<p>在标准中使用了三个层面去定义公钥的类型：</p>
+
+<ol>
+  <li>
+    <p>公钥格式</p>
+
+    <p>这个公钥是如何编码的，证书是如何被展现的。在协议中的<code class="language-plaintext highlighter-rouge">key blob</code>或许除了包括公钥外，还会额外包括证书。</p>
+  </li>
+  <li>
+    <p>签名、加密算法</p>
+
+    <p>或许有一些公钥类型既不支持签名也不支持加密。同时，公钥的使用也会被政策条款约束。所以，不同的公钥类型应该被定义应对不同的政策。</p>
+  </li>
+  <li>
+    <p>签名或加密数据本身的编码</p>
+
+    <p>这包括但不限于<code class="language-plaintext highlighter-rouge">padding</code>、字节序规定、数据格式等。</p>
+  </li>
+</ol>
+
+<p>例如:</p>
+
+<p><code class="language-plaintext highlighter-rouge">ssh-rsa           RECOMMENDED  sign   Raw RSA Key</code>(初始定义的RSA公钥类型)，它表示ssh-rsa是被推荐使用的公钥类型，它是可签名的，同时它不使用证书而是用<code class="language-plaintext highlighter-rouge">RSA公钥</code>，<code class="language-plaintext highlighter-rouge">ssh-rsa</code>是这个公钥类型的标识。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      string    "ssh-rsa"
+      mpint     e
+      mpint     n
+</code></pre></div></div>
+<p>这表示，这个公钥类型的公钥格式符合如下编码：字符串<code class="language-plaintext highlighter-rouge">ssh-rsa</code>紧接着一个<code class="language-plaintext highlighter-rouge">mpint</code>的参数<code class="language-plaintext highlighter-rouge">e</code>和<code class="language-plaintext highlighter-rouge">mpint</code>的参数<code class="language-plaintext highlighter-rouge">n</code>。同时<code class="language-plaintext highlighter-rouge">e</code>和<code class="language-plaintext highlighter-rouge">n</code>将被用于构建签名的<code class="language-plaintext highlighter-rouge">key blob</code>。</p>
+
+<p>同时标准规定使用这个公钥格式进行签名和校验需要使用<code class="language-plaintext highlighter-rouge">SHA-1 hash</code>并配合<code class="language-plaintext highlighter-rouge">RSASSA-PKCS1-v1_5 scheme</code>。签名的结果将以如下形式编码:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      string    "ssh-rsa"
+      string    rsa_signature_blob (该值被编码成一个包含无长度或padding、无符号符合网络字节序的整型的字符串)
+</code></pre></div></div>
+
+<h4 id="publickkey公钥认证方法">publickkey公钥认证方法</h4>
+
+<p>publickey方法是唯一被要求服务端必须实现的认证方法（其他的还包括password、hostbased），在这个认证模型中有私钥权限的一方（若使用publickey进行客户端认证，那这一方就是客户端）必须为认证提供数据。这个方法的大体流程如下：</p>
+
+<ol>
+  <li>使用用户的私钥创建一个签名，并将其发送给服务器。</li>
+  <li>服务器<strong>必须</strong>确认：
+    <ol>
+      <li>公钥是否是受信任的。</li>
+      <li>签名是否是有效的。</li>
+    </ol>
+  </li>
+  <li>如果都满足则必须通过认证，否则必须阻止。</li>
+</ol>
+
+<p>私钥一般以一种加密的形式存储在客户端，用户必须提供<code class="language-plaintext highlighter-rouge">passphrase</code>解密私钥才能生成签名。即使它们不是这样存储的，签名本身也应该需要涉及一些昂贵的计算。为了避免不必要的处理过程和用户交互，在生成签名前需要提供下面的消息给服务端，<strong>询问使用这个公钥进行公钥认证是否是可被接受的</strong>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name in ISO-10646 UTF-8 encoding [RFC3629]
+      string    service name in US-ASCII
+      string    "publickey"
+      boolean   FALSE
+      string    public key algorithm name
+      string    public key blob 
+</code></pre></div></div>
+<p>如果是被接受的（在authorized_keys文件中），服务器则发送如下消息：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_PK_OK
+      string    public key algorithm name from the request
+      string    public key blob from the request
+</code></pre></div></div>
+<p>否则发送 <code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_FAILUR</code>。
+之后客户端发送签名数据正式请求认证：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name
+      string    service name
+      string    "publickey"
+      boolean   TRUE
+      string    public key algorithm name
+      string    public key to be used for authentication
+      string    signature
+</code></pre></div></div>
+<p>其中<code class="language-plaintext highlighter-rouge">signature</code>是<strong>私钥对如下字段进行的签名</strong>：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      string    session identifier
+      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name
+      string    service name
+      string    "publickey"
+      boolean   TRUE
+      string    public key algorithm name
+      string    public key to be used for authentication
+</code></pre></div></div>
+<p>若成功则服务端发送<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>；若失败则发送<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_FAILURE</code>——客户端继续尝试。</p>
+
+<h4 id="rsa-sha2-256">rsa-sha2-256</h4>
+
+<p>2018年3月新发布的rfc定义了<code class="language-plaintext highlighter-rouge">rsa-sha2-256</code>和<code class="language-plaintext highlighter-rouge">rsa-sha2-512</code>算法配合上文所述的<code class="language-plaintext highlighter-rouge">server-sig-algs</code>扩展让SSH使用这些算法进行服务端、客户端认证。</p>
+
+<p>我的设备使用的就是推荐使用的<code class="language-plaintext highlighter-rouge">rsa-sha2-256</code>，具体的认证请求和上文所述的<code class="language-plaintext highlighter-rouge">ssh-rsa</code>基本一致：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     byte      SSH_MSG_USERAUTH_REQUEST
+     string    user name
+     string    service name
+     string    "publickey"
+     boolean   TRUE
+     string    "rsa-sha2-256"
+     string    public key blob:
+         string    "ssh-rsa"
+         mpint     e
+         mpint     n
+     string    signature:
+         string    "rsa-sha2-256"
+         string    rsa_signature_blob
+</code></pre></div></div>
+<p>同时在标准中还有如下关于<code class="language-plaintext highlighter-rouge">7.2版本openssh错误</code>的警告。</p>
+<blockquote>
+  <p>OpenSSH 7.2 (but not 7.2p2) incorrectly encodes the algorithm in the
+   signature as “ssh-rsa” when the algorithm in SSH_MSG_USERAUTH_REQUEST
+   is “rsa-sha2-256” or “rsa-sha2-512”.  In this case, the signature
+   does actually use either SHA-256 or SHA-512.  A server MAY, but is
+   not required to, accept this variant or another variant that
+   corresponds to a good-faith implementation and is considered safe to
+   accept.</p>
+</blockquote>
+
+<h4 id="traffic-analysis">traffic analysis</h4>
+
+<p>因为加密的原因，这里将根据<code class="language-plaintext highlighter-rouge">-vvv</code>与上述标准分析ssh如何执行认证流程。我（主要）根据<a href="https://tools.ietf.org/html/rfc4250">The Secure Shell (SSH) Protocol Assigned Numbers</a>翻阅替换，总结如下。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SSH_MSG_NEWKEYS             21
+SSH_MSG_SERVICE_REQUEST     5
+SSH_MSG_EXT_INFO            7
+SSH_MSG_SERVICE_ACCEPT      6
+SSH_MSG_USERAUTH_REQUEST    50
+SSH_MSG_USERAUTH_FAILURE    51
+SSH_MSG_USERAUTH_SUCCESS    52
+</code></pre></div></div>
+
+<details>
+  <summary>详情</summary>
+  <pre class="highlight">
+<code>debug3: send packet: type SSH_MSG_NEWKEYS
+debug2: set_newkeys: mode 1
+debug1: rekey after 134217728 blocks
+debug1: SSH2_MSG_NEWKEYS sent
+debug1: expecting SSH2_MSG_NEWKEYS
+debug3: receive packet: type SSH_MSG_NEWKEYS
+debug1: SSH2_MSG_NEWKEYS received
+debug2: set_newkeys: mode 0
+debug1: rekey after 134217728 blocks
+debug1: Will attempt key: .ssh/openssh_client_key  explicit
+debug2: pubkey_prepare: done
+debug3: send packet: type SSH_MSG_SERVICE_REQUEST
+debug3: receive packet: type SSH_MSG_EXT_INFO
+debug1: SSH2_MSG_EXT_INFO received
+debug1: kex_input_ext_info: server-sig-algs=&lt;rsa-sha2-256,rsa-sha2-512&gt;
+debug3: receive packet: type SSH_MSG_SERVICE_ACCEPT
+debug2: service_accept: ssh-userauth
+debug1: SSH2_MSG_SERVICE_ACCEPT received
+debug3: send packet: type SSH_MSG_USERAUTH_REQUEST
+debug3: receive packet: type SSH_MSG_USERAUTH_FAILURE
+debug1: Authentications that can continue: publickey
+debug3: start over, passed a different list publickey
+debug3: preferred publickey,keyboard-interactive,password
+debug3: authmethod_lookup publickey
+debug3: remaining preferred: keyboard-interactive,password
+debug3: authmethod_is_enabled publickey
+debug1: Next authentication method: publickey
+debug1: Trying private key: .ssh/openssh_client_key
+Enter passphrase for key '.ssh/openssh_client_key': 
+debug3: sign_and_send_pubkey: RSA SHA256:A2Puw8wXRCeW8m/4qv/4ybEXzfK+qJOa/C4vZp6xmdI
+debug3: sign_and_send_pubkey: signing using rsa-sha2-512
+debug3: send packet: type SSH_MSG_USERAUTH_REQUEST
+debug2: we sent a publickey packet, wait for reply
+debug3: receive packet: type SSH_MSG_USERAUTH_SUCCESS
+debug1: Authentication succeeded (publickey).
+Authenticated to 192.168.50.81 ([192.168.50.81]:10086).
+<br />
+-- connect protocol --
+<br />
+debug1: channel 0: new [client-session]
+debug3: ssh_session2_open: channel_new: 0
+debug2: channel 0: send open
+debug3: send packet: type 90
+debug1: Requesting no-more-sessions@openssh.com
+debug3: send packet: type 80
+debug1: Entering interactive session.
+debug1: pledge: network
+debug3: receive packet: type 80
+debug1: client_input_global_request: rtype hostkeys-00@openssh.com want_reply 0
+debug3: receive packet: type 91
+debug2: channel_input_open_confirmation: channel 0: callback start
+debug2: fd 3 setting TCP_NODELAY
+debug3: ssh_packet_set_tos: set IP_TOS 0x48
+debug2: client_session2_setup: id 0
+debug2: channel 0: request pty-req confirm 1
+debug3: send packet: type 98
+debug2: channel 0: request shell confirm 1
+debug3: send packet: type 98
+debug2: channel_input_open_confirmation: channel 0: callback done
+debug2: channel 0: open confirm rwindow 0 rmax 32768
+debug3: receive packet: type 99
+debug2: channel_input_status_confirm: type 99 id 0
+debug2: PTY allocation request accepted on channel 0
+debug2: channel 0: rcvd adjust 2097152
+debug3: receive packet: type 99
+debug2: channel_input_status_confirm: type 99 id 0
+debug2: shell request accepted on channel 0
+Last login: Mon Apr 29 20:55:35 2019 from 192.168.50.127</code></pre>
+</details>
+
+<p>具体流程如下：</p>
+
+<ol>
+  <li>交换密钥完成，发送SSH2_MSG_NEWKEYS表明以后的数据使用对称加密通信（服务端使用相同packet响应）。</li>
+  <li>客户端根据<code class="language-plaintext highlighter-rouge">-i</code>选项找到明确指定的将要尝试认证的公钥文件。</li>
+  <li>SSH_MSG_SERVICE_REQUEST请求服务端开启认证协议。</li>
+  <li>同时服务端根据客户端在密钥交换算法中的’ext-info-c’请求，使用SSH_MSG_EXT_INFO公示自身的公钥算法扩展，告知客户端自己支持<code class="language-plaintext highlighter-rouge">rsa-sha2-256,rsa-sha2-512</code>。</li>
+  <li>服务端接受请求，SSH_MSG_SERVICE_ACCEPT。</li>
+  <li>客户端发送SSH_MSG_USERAUTH_REQUEST，并选择method为publickey（又或许是空的）。</li>
+  <li>服务端发送SSH_MSG_USERAUTH_FAILURE，并标明其接受的认证方法只有publickey。</li>
+  <li>客户端直接启用publickey模式，并寻找privatekey。</li>
+  <li>对于第一个发现的（被指定的）privatekey，请求输入<code class="language-plaintext highlighter-rouge">passphrase</code>解密私钥，客户端直接签名并发送请求。（而没有尝试询问服务器，这个publickey是否是被授权的（另：openssh client没有，而Bitvise SSH client有））</li>
+  <li>服务端返回<code class="language-plaintext highlighter-rouge">SSH_MSG_USERAUTH_SUCCESS</code>。</li>
+</ol>
+
+<h3 id="密码认证">密码认证</h3>
+
+<p>如果使用密码认证，客户端需要发送如下的packet:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name
+      string    service name
+      string    "password"
+      boolean   FALSE
+      string    plaintext password in ISO-10646 UTF-8 encoding [RFC3629]
+</code></pre></div></div>
+<p>这里规定<strong>协议传输</strong>的密码串必须是以<code class="language-plaintext highlighter-rouge">ISO-10646 UTF-8</code>格式编码的，这意味着客户端和服务端在接受输入和最后对比系统（编码）密码的时候都或需要做相应的转换。同时如果协商出的加密算法是<code class="language-plaintext highlighter-rouge">none</code>则，不允许使用密码认证，密码修改也不应该被允许。</p>
+
+<p>对于密码国际化的问题，SSH希望用户输入密码的时候，不考虑当前系统和软件是什么，认证工作依旧能顺利进行。所以需要先对能支持非ASCII密码的系统中的密码和用户名进行<code class="language-plaintext highlighter-rouge">规范化</code>当他们要添加数据库或对比的时候，SSH的实现应该使用[RFC4013]对双方存储和对比的密码进行规范化。</p>
+
+<p>最后如果密码过期，服务端应该发送如下packet：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_PASSWD_CHANGEREQ
+      string    prompt in ISO-10646 UTF-8 encoding [RFC3629]
+      string    language tag [RFC3066]
+</code></pre></div></div>
+<p>客户端则需要回复如下：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name
+      string    service name
+      string    "password"
+      boolean   TRUE
+      string    plaintext old password in ISO-10646 UTF-8 encoding
+                 [RFC3629]
+      string    plaintext new password in ISO-10646 UTF-8 encoding
+                 [RFC3629]
+</code></pre></div></div>
+<p>最后的服务器会有如下回复：</p>
+<ul>
+  <li>SSH_MSG_USERAUTH_SUCCESS 
+  密码已经被改变，已经认证成功</li>
+  <li>SSH_MSG_USERAUTH_FAILURE with partial success
+  密码已经被改变，但是需要再认证一次</li>
+  <li>SSH_MSG_USERAUTH_FAILURE without partial success
+  密码没有被改变，要么是修改密码功能不被支持，要么是旧的密码是错误的。注意，如果服务器已经发送了SSH_MSG_USERAUTH_PASSWD_CHANGEREQ，就说明他是支持修改密码的。</li>
+  <li>SSH_MSG_USERAUTH_CHANGEREQ
+  修改的密码不被接受，可能是修改的密码太简单或者其他。</li>
+</ul>
+
+<h3 id="host-based认证">Host-Based认证</h3>
+
+<p>一些希望站点在自己主机上登陆远程主机用户的认证方式。这样不符合高的安全等级，但他确实很方便。这是一个可选的认证方式，在实现的时候一定要注意防止一个普通的用户有能力窃取到服务器的private host key。</p>
+
+<p>如果这这种认证方式被启用，客户端只需要提供包括<strong>远程host名称</strong>、<strong>远程host公钥</strong>、<strong>远程host私钥签名</strong>等数据在内的packet：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name
+      string    service name
+      string    "hostbased"
+      string    public key algorithm for host key
+      string    public host key and certificates for client host
+      string    client host name expressed as the FQDN in US-ASCII
+      string    user name on the client host in ISO-10646 UTF-8 encoding
+                 [RFC3629]
+      string    signature
+</code></pre></div></div>
+<p>被签名的内容为：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      string    session identifier
+      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name
+      string    service name
+      string    "hostbased"
+      string    public key algorithm for host key
+      string    public host key and certificates for client host
+      string    client host name expressed as the FQDN in US-ASCII
+      string    user name on the client host in ISO-10646 UTF-8 encoding
+                 [RFC3629]
+</code></pre></div></div>
+<p>服务器甚至可以忽略具体的user name，它必须要做的只有检查host key是否是真的，已经签名是否是有效的。</p>
+
+<p><strong>比较奇怪的是，协议中没有明确的规定如何返回这类认证被拒绝具体packet的解释</strong>,比如当远程host签名无效，又或者服务器不支持远程host的公钥算法等。</p>
+
+<h3 id="keyboard-interactive认证">keyboard-interactive认证</h3>
+
+<p>前面的各种认证方法都十分依赖于双端的实现，如果新版本的服务器由启用了一个新的认证方法，那就意味着客户端也必须更新添加方法。又因为“认证”这件事的特殊性（本质上它的计算工作是完全在服务端完成的），人们发现可以设计一种<strong>通用</strong>的认证方法，像HTTP协议传送的HTML一样（服务端传给客户端的东西客户端并不需要知道他具体是什么，只需要把它显示出来，剩下的交给用户去识别和输入），这种方法的设计目的就是<strong>尽可能的让客户端对于认证过程完全不知情，并且一切都基于用户使用键盘进行的数据交互</strong>。使用这种方法，服务端可以轻松的扩展具体的认证算法，而客户端可以不需要做任何的更新。</p>
+
+<p>使用这种认证方法，可以轻松的实现<code class="language-plaintext highlighter-rouge">挑战应答式认证</code>（客户端返回Hash（随机数（挑战）+密码））和<code class="language-plaintext highlighter-rouge">OTP</code>（每次一密码，如短信登陆）。但是，它在客户端依然是有缺陷的，如果要使用它在认证机制中则不允许有特殊编码，比如硬件驱动或者是<code class="language-plaintext highlighter-rouge">password mangling</code>（把简单密码变成复杂密码的工具）。</p>
+
+<p>主要的消息有3个，SSH_MSG_USERAUTH_REQUEST、SSH_MSG_USERAUTH_INFO_REQUEST、SSM_MSG_USERAUTH_INFO_RESPONSE。</p>
+
+<p>SSH_MSG_USERAUTH_REQUEST由客户端发送给服务端，用于启用这一认证方法，语言标签是不推荐使用的。同时如果客户端足够确信可以把<strong>用户</strong>期望使用的方法填在submethods里，逗号分隔。之后服务端<strong>可以</strong>根据自己的实现选择是否参照submethods，提示用户选择具体的认证方法。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_REQUEST
+      string    user name (ISO-10646 UTF-8, as defined in [RFC-3629])
+      string    service name (US-ASCII)
+      string    "keyboard-interactive" (US-ASCII)
+      string    language tag (as defined in [RFC-3066])
+      string    submethods (ISO-10646 UTF-8)
+</code></pre></div></div>
+<p>服务端收到上述方法后必须回复SSH_MSG_USERAUTH_SUCCESS、SSH_MSG_USERAUTH_FAILURE、SSH_MSG_USERAUTH_INFO_REQUEST消息其中的一个。并且协议规定如果用户填写了错误的<code class="language-plaintext highlighter-rouge">service name</code>或者<code class="language-plaintext highlighter-rouge">user name</code>服务器并不能直接发送SSH_MSG_USERAUTH_FAILURE。相反的，它应该再一次发送SSH_MSG_USERAUTH_INFO_REQUEST，然后忽略客户端对于这个request的回应（不论他是否是完全认证正确的），再在一个<strong>可配置的时间（默认是2秒）</strong>后发送SSH_MSG_USERAUTH_FAILURE，这么做的目的是阻止用户通过对比结果猜测出合法的用户名。</p>
+
+<p>之后服务端则根据自己的实现选择一个认证方式询问客户端。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_INFO_REQUEST
+      string    name (ISO-10646 UTF-8)
+      string    instruction (ISO-10646 UTF-8)
+      string    language tag (as defined in [RFC-3066])
+      int       num-prompts
+      string    prompt[1] (ISO-10646 UTF-8)
+      boolean   echo[1]
+      ...
+      string    prompt[num-prompts] (ISO-10646 UTF-8)
+      boolean   echo[num-prompts]
+</code></pre></div></div>
+<p>name为请求信息的名称，instruction为具体的详细指示用户填写的内容，每个prompts为每次STDIN打开前输出的提示。协议考虑到不同的终端设备在显示上的能力或许会有局限，这个输出局限或许会对认证的结果造成影响。所以，应该至少保证<strong>instruction</strong>完全被显示，<strong>name和prompt至少30个字符显示，且如果被截取必须明确地让用户知道发生了截取</strong>。哪怕，num-prompt为0时，instruction和name一样需要被正常显示（比如，通知最后认证成功的时候，就不再需要用户输入了）。</p>
+
+<p>如下是用户做出的应答的消息格式,num-responses必须和num-prompts长度一致。密码输入、传输的部分和上文一样，一样需要被规范化。</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>      byte      SSH_MSG_USERAUTH_INFO_RESPONSE
+      int       num-responses
+      string    response[1] (ISO-10646 UTF-8)
+      ...
+      string    response[num-responses] (ISO-10646 UTF-8)
+</code></pre></div></div>
+<p>最后，协议规定如果认证发生错误（密码错误之类），不应该发送SSH_MSG_USERAUTH_INFO_REQUEST让用户重新输入，除非是这个认证是（类似于或运算）的补充形式。因为，还有其他的认证方法需要被尝试。下文是RFC描述的一个可以被运用的样例：</p>
+<details>
+  <summary>详情</summary>
+  <pre class="highlight">
+<code>C:   byte      SSH_MSG_USERAUTH_REQUEST
+C:   string    "user23"
+C:   string    "ssh-userauth"
+C:   string    "keyboard-interactive"
+C:   string    "en-US"
+C:   string    "
+S:   byte      SSH_MSG_USERAUTH_INFO_REQUEST
+S:   string    "Password Authentication"
+S:   string    ""
+S:   string    "en-US"
+S:   int       1
+S:   string    "Password: "
+S:   boolean   FALS
+[Client prompts user for password
+C:   byte      SSH_MSG_USERAUTH_INFO_RESPONSE
+C:   int       1
+C:   string    "password
+S:   byte      SSH_MSG_USERAUTH_INFO_REQUEST
+S:   string    "Password Expired"
+S:   string    "Your password has expired."
+S:   string    "en-US"
+S:   int       2
+S:   string    "Enter new password: "
+S:   boolean   FALSE
+S:   string    "Enter it again: "
+S:   boolean   FALS
+[Client prompts user for new password
+C:   byte      SSH_MSG_USERAUTH_INFO_RESPONSE
+C:   int       2
+C:   string    "newpass"
+C:   string    "newpass"
+
+S:   byte      SSH_MSG_USERAUTH_INFO_REQUEST
+S:   string    "Password changed"
+S:   string    "Password successfully changed for user23."
+S:   string    "en-US"
+S:   int       0
+[Client displays message to user]
+
+C:   byte      SSH_MSG_USERAUTH_INFO_RESPONSE
+C:   int       0
+
+S:   byte      SSH_MSG_USERAUTH_SUCCESS</code></pre>
+</details>
+
+<h2 id="小结">小结</h2>
+
+<p>花了三四天的时间整理这篇文章，有了一些体会与理解：</p>
+
+<ol>
+  <li>在密码学的相关程序实现中，密钥对是1-1对应的。</li>
+  <li>非对称加解密的速度不及对称加解密，所以在SSH中的private/public key主要是用来认证的。
+    <ol>
+      <li>private key加密的数据叫做签名。（签名 + public key）is a proof of possession of a private key。</li>
+      <li>public key可以从private key文件中导出(所以客户端一个private文件就可以认证)。
+        <ul>
+          <li><code class="language-plaintext highlighter-rouge">ssh-keygen -y -f ~/.ssh/id_rsa</code> openssh标准
+            <ul>
+              <li>The key type</li>
+              <li>A chunk of PEM-encoded data</li>
+              <li>A comment</li>
+            </ul>
+          </li>
+          <li><code class="language-plaintext highlighter-rouge">ssh-keygen -e -f ~/.ssh/id_rsa</code> ssh标准<a href="https://tools.ietf.org/html/rfc4716#section-3.3">rfc4716</a></li>
+        </ul>
+      </li>
+      <li>最原始的安全保障是由Key Exchange Algrorithm提供的。</li>
+    </ol>
+  </li>
+  <li>椭圆曲线密钥交换算法的绝大多数参数都是预设的，不像DH需要临时协商。</li>
+  <li>如果需要制定一套协议或是标准，例如rfc，数据类型的<strong>编码</strong>是必须要被考虑在内的；同时应该尽量的将协议设计成<strong>不依赖于次序</strong>的。</li>
+  <li>ssh的verbose选项提供最多3个v，来输出不同层级的debug信息。</li>
+  <li>因为私钥不需要传递所以rfc4176只表明其是公钥格式，但其实它也是私钥文件的格式，在<code class="language-plaintext highlighter-rouge">ssh-keygen</code>中有说明，默认keygen出来的私钥就是符合rfc4176格式的。</li>
+  <li><code class="language-plaintext highlighter-rouge">ssh -i</code>选项可以手动临时添加私钥，并且它将最先被尝试。之后将一次尝试 <code class="language-plaintext highlighter-rouge">ssh-add -L</code>中的私钥，最后尝试<code class="language-plaintext highlighter-rouge">.ssh/id_rsa</code>等。</li>
+</ol>
+
+<h2 id="reference">Reference</h2>
+<ol>
+  <li>
+    <p><a href="https://www.openssh.com/specs.html">OpenSSH Specifications</a></p>
+
+    <p>这是OpenSSH所展现的最直接的资料页面，但是有很多细节部分的规格与实现没有罗列。而且RFC文档错综复杂，有很多地方都引用不全必须靠“幸运”才能翻看到。</p>
+  </li>
+  <li>
+    <p><a href="https://www.mnin.org/write/2006_sshcrypto.html">Cryptography of SSH</a></p>
+
+    <p>在这个页面可以很直观的看到到DH密钥交换协议的流程。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4251">The Secure Shell (SSH) Protocol Architecture</a></p>
+
+    <p>SSH协议架构的rfc页面，它将SSH分为三部分，传输、认证和连接。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4253#section-7">The Secure Shell (SSH) Transport Layer Protocol</a></p>
+
+    <p>SSH传输层协议的rfc页面，在这里主要讨论如何为协议提供加密、服务端认证、数据完整性保护、压缩协议内容等功能。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc5656#page-5">Elliptic Curve Algorithm Integration in the Secure Shell Transport Layer</a></p>
+
+    <p>这篇rfc将ECDH算法集成在SSH传输层协议中，用作签名和密钥交换。</p>
+  </li>
+  <li>
+    <p><a href="https://git.libssh.org/projects/libssh.git/tree/doc/curve25519-sha256@libssh.org.txt">curve25519-sha256@libssh.org.txt</a></p>
+
+    <p>这篇文章描述了curve25519密钥交换算法，它提供了一个可以替代的方法给DH算法或ECDH算法。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/draft-ietf-curdle-ssh-kex-sha2-03">Key Exchange (KEX) Method Updates and Recommendations for Secure Shell (SSH)</a></p>
+
+    <p>2016年更新的SSH密钥交换算法更新建议。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/draft-ietf-curdle-ssh-curves-00#ref-Curve25519">  Secure Shell (SSH) Key Exchange Method using Curve25519 and Curve448 draft-ietf-curdle-ssh-curves-00</a></p>
+
+    <p>这篇文章描述了在SSH中如何实现Curve25519。</p>
+  </li>
+  <li>
+    <p><a href="https://cr.yp.to/ecdh/curve25519-20060209.pdf">Curve25519: New Diffie-Hellman Speed Records</a></p>
+
+    <p>25519曲线原论文。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc7748">Elliptic Curves for Security</a></p>
+
+    <p>具体介绍Curve25519在密码学中的应用，相关函数使用说明。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4255#page-2">Using DNS to Securely Publish Secure Shell (SSH) Key Fingerprints</a></p>
+
+    <p>介绍SSH fingerprint以及推荐的使用方式。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc8308#page-6">Extension Negotiation in the Secure Shell (SSH) Protocol</a></p>
+
+    <p>介绍SSH中如何查询扩展信息，并使用共有的（认证）相关扩展。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc8332">Use of RSA Keys with SHA-256 and SHA-512 in the Secure Shell (SSH) Protocol</a></p>
+
+    <p>标准规定扩展使用RSA配合SHA摘要算法完成认证操作。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4250">The Secure Shell (SSH) Protocol Assigned Numbers</a></p>
+
+    <p>规定协议中各种ID（宏）所使用的序号。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4716#section-3.3">The Secure Shell (SSH) Public Key File Format</a></p>
+
+    <p>SSH定义的公钥文件格式标准。</p>
+  </li>
+  <li>
+    <p><a href="https://tools.ietf.org/html/rfc4256">Generic Message Exchange Authentication for the Secure Shell Protocol (SSH)</a></p>
+
+    <p>这个标准定义了一种基于键盘交互的通用认证方法。</p>
+  </li>
+</ol>
+
+        </article>
+        <br>
+        <div class="copyright">
+        <h4>文档信息</h4>
+        <ul>
+            <li>作者: 
+                
+                    Anon
+                
+                
+                
+                <a href="mailto:devtsai@outlook.com" title="devtsai@outlook.com"><i class="far fa-envelope-open" aria-hidden="true"></i></a> 
+                 
+            </li>
+            
+            
+            <li>发表日期： <abbr title="2019-04-28T00:00:00+08:00">
+                2019-04-28
+               </abbr></li>
+            <li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+            <li>若文章中存在事实上的错误，欢迎评论或与作者联系。</li>
+        </ul>
+</div>
+<style type="text/css">
+    .copyright{
+            margin-top:1em;
+            padding:1em;
+            border:1px solid #d3d3d3;
+            background-color:#DEEBF7;
+        }
+        
+        .copyright h4{
+            margin-top: 2px;
+            border-bottom:1px solid gray;
+            font-size:1.5em;
+            font-weight:bold;
+            color:#556677;
+        }
+        
+        .copyright ul{
+            padding-left:2em;
+            padding-right:2em;
+        }
+        
+        .copyright li{
+            color:#556677;
+        }
+</style>
+    
+        <hr>
+
+        
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+            
+            
+                
+                    
+                
+                    
+                
+                    
+                
+            
+        
+        
+        <hr>
+
+        <div class="post-recent">
+    <div class="pre">
+        
+        <p><strong>上一篇</strong> <a href="/2019/04/21/SSH_LAG/">Mac使用SSH连接虚拟机内Linux缓慢</a></p>
+        
+    </div>
+    <div class="nex">
+
+        
+        <p><strong>下一篇</strong> <a href="/2019/05/05/DataStructure_Queue_C++/">数据结构（四）：链队列的C++实现</a></p>
+        
+    </div>
+</div>
+
+
+        <h2 id="comments">评论</h2>
+        
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     * RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     * LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+
+    var disqus_config = function() {
+        this.page.url = 'http://localhost:4000/2019/04/28/SSH/'; // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = 'http://localhost:4000/2019/04/28/SSH/'; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+
+    (function() { // DON'T EDIT BELOW THIS LINE
+        var d = document,
+            s = d.createElement('script');
+
+        s.src = '//emous-github-io.disqus.com/embed.js';
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+
+    </div>
+    <button class="anchor"><i class="fa fa-anchor"></i></button>
+    <div class="right">
+        <div class="wrap">
+
+            <!-- Content -->
+            <div class="side content">
+                <div>
+                    Content
+                </div>
+                <ul id="content-side" class="content-ul">
+                    
+                    <li><a href="#comments">Comments</a></li>
+                </ul>
+            </div>
+            <!-- 其他div框放到这里 -->
+            <!-- <div class="side">bbbb</div> -->
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * target _blank
+ */
+(function() {
+    var aTags = document.querySelectorAll('article a:not([id])');
+    for (var i = 0; i < aTags.length; i++) {
+        aTags[i].setAttribute('target', '_blank')
+    }
+}());
+</script>
+<script src="/js/pageContent.js " charset="utf-8"></script>
+
+
+    <footer class="site-footer">
+
+
+    <div class="wrapper">
+
+        <p class="description">
+            
+        </p>
+        <p class="contact">
+            Contact me at: 
+            <a href="mailto:devtsai@outlook.com" title="email"><i class="far fa-envelope-open" aria-hidden="true"></i></a>  
+            <a href="https://github.com/emous" title="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>  
+            <a href=" https://stackoverflow.com/users/9212741/anon" title="StackOverflow"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a>
+            <a href="https://Liang.blogspot.com/" title="Blogger"><i class="fab fa-blogger" aria-hidden="true"></i></a> 
+
+             
+             
+             
+              
+             
+            
+        </p>
+         <p class="text-center">
+            LiangLab 2022 |
+            Welcome You
+        </p>
+
+    </div>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <div class="back-to-top">
+    <a href="#top" data-scroll>
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </a>
+</div>
+
+    <script src=" /js/main.js " charset="utf-8"></script>
+    <script src=" /js/smooth-scroll.min.js " charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    <!-- <script src=" /js/scroll.min.js " charset="utf-8"></script> -->
+  </body>
+
+</html>

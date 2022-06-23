@@ -1,0 +1,699 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#定义" id="markdown-toc-定义">定义</a></li>
+  <li><a href="#性质" id="markdown-toc-性质">性质</a></li>
+  <li><a href="#二叉树" id="markdown-toc-二叉树">二叉树</a>    <ul>
+      <li><a href="#存储结构" id="markdown-toc-存储结构">存储结构</a>        <ul>
+          <li><a href="#顺序存储" id="markdown-toc-顺序存储">顺序存储</a></li>
+          <li><a href="#链式存储" id="markdown-toc-链式存储">链式存储</a></li>
+        </ul>
+      </li>
+      <li><a href="#遍历" id="markdown-toc-遍历">遍历</a>        <ul>
+          <li><a href="#递归遍历" id="markdown-toc-递归遍历">递归遍历</a></li>
+          <li><a href="#表达式的表示" id="markdown-toc-表达式的表示">表达式的表示</a></li>
+          <li><a href="#非递归遍历" id="markdown-toc-非递归遍历">非递归遍历</a></li>
+        </ul>
+      </li>
+      <li><a href="#线索二叉树" id="markdown-toc-线索二叉树">线索二叉树</a>        <ul>
+          <li><a href="#线索化" id="markdown-toc-线索化">线索化</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#树和森林" id="markdown-toc-树和森林">树和森林</a>    <ul>
+      <li><a href="#存储结构-1" id="markdown-toc-存储结构-1">存储结构</a>        <ul>
+          <li><a href="#双亲表示法" id="markdown-toc-双亲表示法">双亲表示法</a></li>
+          <li><a href="#孩子表示法" id="markdown-toc-孩子表示法">孩子表示法</a></li>
+        </ul>
+      </li>
+      <li><a href="#森林和二叉树互换" id="markdown-toc-森林和二叉树互换">森林和二叉树互换</a></li>
+      <li><a href="#遍历森林" id="markdown-toc-遍历森林">遍历森林</a></li>
+    </ul>
+  </li>
+  <li><a href="#应用" id="markdown-toc-应用">应用</a>    <ul>
+      <li><a href="#等价问题" id="markdown-toc-等价问题">等价问题</a></li>
+      <li><a href="#赫夫曼" id="markdown-toc-赫夫曼">赫夫曼</a>        <ul>
+          <li><a href="#最优二叉树赫夫曼树" id="markdown-toc-最优二叉树赫夫曼树">最优二叉树（赫夫曼树）</a></li>
+          <li><a href="#赫夫曼编码" id="markdown-toc-赫夫曼编码">赫夫曼编码</a>            <ul>
+              <li><a href="#赫夫曼编码的实现" id="markdown-toc-赫夫曼编码的实现">赫夫曼编码的实现</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/cover.png" /></div>
+
+<p>树的相关知识。</p>
+
+<hr />
+
+<h2 id="定义">定义</h2>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/1.png" /></div>
+
+<p><strong>子树</strong>：</p>
+
+<p>根节点紧挨着的每个节点作为根节点构成的树。图中A有3个子树（{BEKLF},{CG},{DHMIJ}）。</p>
+
+<p><strong>结点的度</strong>：</p>
+
+<p>子树的个数。</p>
+
+<p><strong>树的度</strong>：</p>
+
+<p>树内所有结点的度的最大值。</p>
+
+<p><strong>深度</strong>：</p>
+
+<p>树中的最大层数。该图代表的树的深度为4。</p>
+
+<p><strong>祖先</strong>：</p>
+
+<p>根节点到该节点分支上所有的结点。图中E的祖先为(B,A)。</p>
+
+<p><strong>子孙</strong>：</p>
+
+<p>以某节点为根的子树中的任意结点（除去自身），都是该节点的子孙。图中E的子孙为(K,L)。</p>
+
+<p><strong>堂兄弟</strong>：</p>
+
+<p>父（双亲）结点的所有兄弟结点的所有孩子。图中E的堂兄弟为（G,H,I,J）。</p>
+
+<p><strong>有/无序树</strong>：</p>
+
+<p>树中结点的各子树的左右排列是可以/不可以互换的。</p>
+
+<p><strong>森林</strong>：</p>
+
+<p>m棵互不相交的树的集合。对于树中的每一个结点而言，其子树的集合构成了森林。</p>
+
+<p><strong>二叉树</strong>：</p>
+
+<p>树的度为2的有序树。</p>
+
+<p><strong>完全二叉树</strong>：</p>
+
+<p>二叉树中的结点和满二叉树的结点一一对应。（结点从左往右一个接一个不空位置。）</p>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/2.png" /></div>
+
+<p><strong>正则二叉树</strong>：</p>
+
+<p>不包含度为1的结点的二叉树。</p>
+
+<p><strong>赫夫曼树</strong>：</p>
+
+<p>带权路径长度最小的二叉树。</p>
+
+<p><strong>相似树</strong>：</p>
+
+<p>形态同，元素值不一定同。</p>
+
+<p><strong>等价树</strong>：</p>
+
+<p>相似且元素值都相同。</p>
+
+<h2 id="性质">性质</h2>
+
+<ol>
+  <li>
+    <p>二叉树的第$i$层最多$2^{i-1}$个结点。</p>
+  </li>
+  <li>
+    <p>深度为$k$的二叉树最多$2^k-1$个结点。</p>
+  </li>
+  <li>
+    <p>任何一个二叉树，如果其叶子（终端）结点数为$n_0$，度为$2$的结点数为$n_2$，则$n_0=n_2+1$。</p>
+
+    <p>$n=n_0+n_1+n_2$</p>
+
+    <p>$n = B+1$ （除根结点外，每个结点都是由一个分支进入）</p>
+
+    <p>$B=n_1+2n_2$（每个分支要么由度为2的结点射出要么由度 为1的结点射出）</p>
+
+    <p>（叶子结点的个数是度为2的结点的个数 + 1）</p>
+  </li>
+  <li>
+    <p>具有$n$个结点的<strong>完全二叉树</strong>的深度为$\lfloor \log_2n \rfloor + 1$。</p>
+  </li>
+  <li>
+    <p>对于有$n$个结点的完全二叉树（从左往右）的第$i(1\leqslant i \leqslant n)$个结点：</p>
+
+    <ol>
+      <li>$i$为1，结点为根，无父结点。</li>
+      <li>其余任何结点，父结点为第$\lfloor i/2 \rfloor$。</li>
+      <li>若$2i &gt; n $则该结点没有左孩子结点。</li>
+      <li>若$2i +1&gt; n $则该结点没有右孩子结点。</li>
+    </ol>
+  </li>
+  <li>
+    <p>$n$个叶子结点的正则二叉树一共有$2n-1$个结点。</p>
+  </li>
+  <li>
+    <p>$n$个结点的不相似的二叉树有$\frac{1}{n+1} C_{2 n}^{n}$个。</p>
+  </li>
+  <li>
+    <p>$n$个结点的不相似的树的个数和$n-1$个不相似结点的二叉树的个数相同。</p>
+  </li>
+</ol>
+
+<h2 id="二叉树">二叉树</h2>
+
+<h3 id="存储结构">存储结构</h3>
+
+<h4 id="顺序存储">顺序存储</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define MAX_TREE_SIZE 100					// 二叉树的最大结点数
+</span><span class="k">typedef</span> <span class="n">TElemType</span> <span class="n">SqBiTree</span><span class="p">[</span><span class="n">MAX_TREE_SIZE</span><span class="p">];</span>	<span class="c1">// 0号单元存储根结点</span>
+<span class="n">SqBiTree</span> <span class="n">bt</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/3.png" /></div>
+
+<p>把<strong>完全二叉树中的结点编</strong>号和<strong>数组的索引编号</strong>对应。数组中的元素类型需要提供功能以标识元素是否存在（图中以0假定不存在）。</p>
+
+<p><strong>顺序存储结构仅适用于存储完全二叉树</strong>，因为最坏的情况下，一个深度为$k$且仅有$k$个结点的单支树却需要长度为$2^k-1$的一维数组。</p>
+
+<h4 id="链式存储">链式存储</h4>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/4.png" /></div>
+
+<p>链式存储包含两种形式，含有两个指针域的结点结构——二叉链表（只指向孩子结点）和含有三个指针域的结点结构——三叉链表（指向孩子结点和父结点）。</p>
+
+<p>含有$n$个结点的二叉链表中有$n+1$个空域，可以利用这些空域存储额外的信息构建——<strong>线索链表</strong>。</p>
+
+<h3 id="遍历">遍历</h3>
+
+<p>对于二叉树的遍历<strong>按照对于根节点的访问顺序</strong>分为三个方式（都是从左到右）：先序遍历，中序遍历和后序遍历。</p>
+
+<p>先序遍历</p>
+
+<ol>
+  <li>访问根节点。</li>
+  <li>先序遍历左子树。</li>
+  <li>先序遍历右子树。</li>
+</ol>
+
+<p>中序遍历</p>
+
+<ol>
+  <li>中序遍历左子树。</li>
+  <li>访问根节点。</li>
+  <li>中序遍历右子树。</li>
+</ol>
+
+<p>后序遍历</p>
+
+<ol>
+  <li>后序遍历左子树。</li>
+  <li>后序遍历右子树。</li>
+  <li>访问根节点。</li>
+</ol>
+
+<h4 id="递归遍历">递归遍历</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">PreOrderTraverse</span><span class="p">(</span><span class="n">BiTree</span> <span class="n">T</span><span class="p">,</span> <span class="n">Status</span><span class="p">(</span><span class="o">*</span> <span class="n">Visit</span><span class="p">)(</span><span class="n">TElemType</span> <span class="n">e</span><span class="p">)){</span>
+    <span class="c1">// 先序遍历二叉树的递归算法</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">T</span><span class="p">){</span>
+        <span class="n">Visit</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
+        <span class="n">PreOrderTraverse</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">,</span><span class="n">Visit</span><span class="p">);</span>
+        <span class="n">PreOrderTraverse</span><span class="p">(</span><span class="n">T</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">,</span><span class="n">Visit</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="表达式的表示">表达式的表示</h4>
+
+<p>若表达式为数或简单变量，则对应二叉树中仅有一个根结点，其数据域存放该表达式信息；若表达式=（第一操作数）（运算符）（第二操作数），则相应的二叉树中以左子树表示第一操作数，右子树表示第二操作数，根节点的数据域存放运算符（若为一元运算符则左子树为空）。操作数本身又为表达式。</p>
+
+<p>则对于表达式$a+b *(c-d)-e / f$，可以得到其对应的二叉树为下图。</p>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/5.png" /></div>
+
+<p>先序遍历得到序列$-+a * b-c d / e f$（前缀表示，波兰式）。</p>
+
+<p>中序遍历得到序列$a+b * c-d-e / f$（中缀表示）。</p>
+
+<p>后序遍历得到序列$a b c d-*+e f-$（后缀表示，逆波兰式）。</p>
+
+<h4 id="非递归遍历">非递归遍历</h4>
+
+<p>以中序遍历为例，对其递归遍历算法实际操作过程可以做如下分析。</p>
+
+<p>将根结点（不为空）压入栈中</p>
+
+<p>循环直到（栈为空栈）{</p>
+
+<p>​	循环直到（栈顶为空）{</p>
+
+<p>​		压入栈顶结点的左子结点。</p>
+
+<p>​	}</p>
+
+<p>​	// 当前栈顶一定为空 （可能是访问左结点导致的空 也可能是 访问右结点导致的空）</p>
+
+<p>​	出栈。</p>
+
+<p>​	// 当前栈顶可能时单独的左子结点 也可能是 单独的右子结点 也可能 从根结点退出</p>
+
+<p>​	如果（栈非空）{</p>
+
+<p>​		（栈顶结点一定不存在左子结点了）</p>
+
+<p>​		访问栈顶结点。</p>
+
+<p>​		退栈。</p>
+
+<p>​		压入该结点的右子结点。</p>
+
+<p>​	}</p>
+
+<p>}</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">InOrderTravers</span><span class="p">(</span><span class="n">BiTree</span> <span class="n">T</span><span class="p">,</span> <span class="n">Status</span> <span class="p">(</span><span class="o">*</span> <span class="n">Visit</span><span class="p">)(</span><span class="n">TElemType</span> <span class="n">e</span><span class="p">)){</span>
+    <span class="c1">// 二叉链表 中序遍历 非递归</span>
+    <span class="n">InitStack</span><span class="p">(</span><span class="n">S</span><span class="p">);</span>
+    <span class="n">Push</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">T</span><span class="p">);</span>				<span class="c1">// 压入根指针</span>
+    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">StackEmpty</span><span class="p">(</span><span class="n">S</span><span class="p">)){</span>  <span class="c1">// 只要栈中还有没有处理完的结点</span>
+   		<span class="c1">// 如果当前栈顶不是空元素，尽可能的压入该元素的左结点</span>
+    	<span class="k">while</span><span class="p">(</span><span class="n">GetTop</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">p</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">p</span><span class="p">)</span> <span class="n">Push</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">);</span>
+       	<span class="c1">// 脱去栈顶的指针</span>
+        <span class="n">Pop</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">p</span><span class="p">);</span> 
+        <span class="c1">// 如果栈还没有处理完</span>
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">StackEmpty</span><span class="p">(</span><span class="n">S</span><span class="p">)){</span>
+            <span class="c1">// 当前栈顶元素一定不存在左子结点了，所以按照中序遍历直接可以访问栈顶元素了。</span>
+        	<span class="n">Pop</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">p</span><span class="p">);</span><span class="n">Visit</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span> <span class="c1">// 访问当前栈顶结点，并退栈。</span>
+            <span class="n">Push</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">);</span>		<span class="c1">// 压入该结点的右子结点。</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">InOrderTravers</span><span class="p">(</span><span class="n">BiTree</span> <span class="n">T</span><span class="p">,</span> <span class="n">Status</span> <span class="p">(</span><span class="o">*</span> <span class="n">Visit</span><span class="p">)(</span><span class="n">TElemType</span> <span class="n">e</span><span class="p">)){</span>
+    <span class="c1">// 另一个实现</span>
+    
+    <span class="n">InitStack</span><span class="p">(</span><span class="n">S</span><span class="p">);</span> <span class="n">p</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span>
+    
+    <span class="c1">// 只要当下待处理的结点不为空，或者栈中还有结点</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">p</span> <span class="o">||</span> <span class="o">!</span><span class="n">StackEmpty</span><span class="p">(</span><span class="n">S</span><span class="p">)){</span>
+        <span class="c1">// 如果当前有待处理结点，将其左子结点依次压入栈中，并重置待处理结点</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="p">){</span><span class="n">Push</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">p</span><span class="p">);</span> <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;}</span>
+        <span class="k">else</span><span class="p">{</span>
+            <span class="c1">// 若待处理结点被设置为空（说明待处理结点的最左子结点已经压栈到位）</span>
+            
+            <span class="n">Pop</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">p</span><span class="p">);</span> <span class="n">Visit</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
+            <span class="c1">// 最左结点处理完毕（该结点一定不存在更左结点），所以将其右子结点设置成待处理结点（此时没有压栈）。</span>
+            <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>时间复杂度为$O(n)$，空间复杂度最坏情况也为$O(n)$。</p>
+
+<h3 id="线索二叉树">线索二叉树</h3>
+
+<p>通过给不存在子结点的结点，提供相关的前驱后继信息（放置于原本为空的指针域）可以加速二叉树的遍历。但是需要额外的提供两个标志域，用于标识该信息的类型是<strong>单纯的子结点</strong>还是用于<strong>表示前驱后继的线索</strong>。其节点结构与标志含义如下图所示：</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/6.png" /></div>
+
+<div style="text-align: center;"><img style="height:100px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/7.png" /></div>
+
+<p><strong>线索化</strong>指对二叉树以某种次序遍历使其变成线索二叉树的过程。下图为一个中序线索链表实例，虚线为线索，实现为实际子结点。</p>
+
+<div style="text-align: center;"><img style="height:200px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/5.png" /></div>
+
+<div style="text-align: center;"><img style="height:350px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/8.png" /></div>
+
+<p>虽然线索二叉树的遍历过程也是$O(n)$，但其常数因子却比之前的算法的常数因子小得多，并且整个过程不需要使用<strong>栈</strong>。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 二叉树的二叉线索存储</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span><span class="n">Link</span><span class="p">,</span> <span class="n">Thread</span><span class="p">}</span> <span class="n">PointerTag</span><span class="p">;</span> <span class="c1">// Link == 0, Thread == 1</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">BitThrNode</span><span class="p">{</span>
+    <span class="n">TElemType</span> 				<span class="n">data</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">BitThrNode</span> 		<span class="o">*</span><span class="n">lchild</span><span class="p">,</span> <span class="o">*</span><span class="n">rchild</span><span class="p">;</span>
+    <span class="n">PointerTag</span>				<span class="n">LTag</span><span class="p">,</span><span class="n">RTag</span><span class="p">;</span>	<span class="c1">// 标志</span>
+<span class="p">}</span><span class="n">BiThrNode</span><span class="p">,</span> <span class="o">*</span><span class="n">BitThrTree</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>通常，<strong>在二叉树的线索链表上也会添加一个头结点</strong>，并令其lchild域的指针指向二叉树的<strong>根结点</strong>，rchild域指向中序<strong>遍历的最后一个结点</strong>。同时，令第一个结点的lchild和最后一个结点的rchild指向头结点。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">InOrderTraverse_Thr</span><span class="p">(</span><span class="n">BiThrTree</span> <span class="n">T</span><span class="p">,</span> <span class="n">Status</span><span class="p">(</span><span class="o">*</span> <span class="n">Visit</span><span class="p">)(</span><span class="n">TElemType</span> <span class="n">e</span><span class="p">)){</span>
+    <span class="c1">// 对中序二叉线索树 的 遍历</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span> <span class="c1">// 第一个结点</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">p</span> <span class="o">!=</span> <span class="n">T</span><span class="p">){</span>
+        <span class="c1">// p == T 时则遍历完成，T是最后一个结点的后继</span>
+        
+        <span class="k">while</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">LTag</span> <span class="o">==</span> <span class="n">Link</span><span class="p">)</span> <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">;</span>
+        <span class="c1">// 访问最左叶结点</span>
+        <span class="n">Visit</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">RTag</span> <span class="o">==</span> <span class="n">Thread</span> <span class="o">&amp;&amp;</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span> <span class="o">!=</span> <span class="n">T</span><span class="p">){</span>
+            <span class="c1">// 访问之前那个最左叶节点的 所有 不包含 右子结点的 祖先结点</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span> <span class="n">Visit</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">);</span>
+            <span class="c1">// 直到访问包含右子结点的一个</span>
+        <span class="p">}</span>
+        <span class="c1">// 切换到那个右子结点</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">;</span>
+        
+        <span class="c1">// 继续找最左的叶节点</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="线索化">线索化</h4>
+
+<p>线索化的过程本质上就是在遍历的过程中修改空指针的过程。<code class="language-plaintext highlighter-rouge">pre</code>指针用于记录遍历期间的，刚刚访问过的（上一个）结点，即前驱。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Status</span> <span class="nf">InOrderThreading</span><span class="p">(</span><span class="n">BiThrTree</span> <span class="o">&amp;</span><span class="n">Thrt</span><span class="p">,</span> <span class="n">BiThrTree</span> <span class="n">T</span><span class="p">){</span>
+    <span class="c1">// 中序遍历二叉树T，并将其中序线索化，Thrt指向头结点。</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">Thrt</span> <span class="o">=</span> <span class="p">(</span><span class="n">BiThrTree</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">BiThrNode</span><span class="p">))))</span> <span class="n">exit</span><span class="p">(</span><span class="n">OVERFLOW</span><span class="p">);</span>
+    <span class="c1">// 设置头节点</span>
+    <span class="n">Thrt</span><span class="o">-&gt;</span><span class="n">LTag</span> <span class="o">=</span> <span class="n">Link</span><span class="p">;</span> <span class="n">Thrt</span><span class="o">-&gt;</span><span class="n">RTag</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">;</span>
+    <span class="n">Thrt</span><span class="o">-&gt;</span><span class="n">rchild</span> <span class="o">=</span> <span class="n">Thrt</span><span class="p">;</span> <span class="c1">// 初始化（在后面会正确设置）</span>
+    
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">T</span><span class="p">)</span> <span class="n">Thrt</span><span class="o">-&gt;</span><span class="n">lchild</span> <span class="o">=</span> <span class="n">Thrt</span><span class="p">;</span> <span class="c1">// 若T为空，则只有一个头结点。 (从而使得不会命中下面行数的第一个 if(!pre-&gt;rchild)) </span>
+    <span class="k">else</span><span class="p">{</span>
+        <span class="n">Thrt</span><span class="o">-&gt;</span><span class="n">lchild</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span> <span class="n">pre</span> <span class="o">=</span> <span class="n">Thrt</span><span class="p">;</span>  <span class="c1">// 设置 lchild，pre</span>
+        <span class="n">InThreading</span><span class="p">(</span><span class="n">T</span><span class="p">);</span>
+        
+        <span class="c1">// 此时 pre 是最后一个结点</span>
+        <span class="n">pre</span><span class="o">-&gt;</span><span class="n">rchild</span> <span class="o">=</span> <span class="n">Thrt</span><span class="p">;</span> <span class="n">pre</span><span class="o">-&gt;</span><span class="n">RTag</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">;</span>
+        <span class="n">Thrt</span><span class="o">-&gt;</span><span class="n">rchild</span> <span class="o">=</span> <span class="n">pre</span><span class="p">;</span>
+    <span class="p">}</span>
+  	<span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">InThreading</span><span class="p">(</span><span class="n">BiThrTree</span> <span class="n">p</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="p">){</span>
+        <span class="c1">// 和中序遍历 差不多</span>
+       
+        <span class="c1">// 左子树线索化</span>
+        <span class="n">InThreading</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">);</span>
+        
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span><span class="p">){</span>
+            <span class="c1">// 如果他是最左子树，第一个被遍历到的结点，正好可以把lchild设置成Thrt</span>
+            <span class="n">p</span><span class="o">-&gt;</span><span class="n">LTag</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">;</span>
+            <span class="n">p</span><span class="o">-&gt;</span><span class="n">lchild</span> <span class="o">=</span> <span class="n">pre</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">pre</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">){</span><span class="n">pre</span><span class="o">-&gt;</span><span class="n">RTag</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">;</span> <span class="n">pre</span><span class="o">-&gt;</span><span class="n">rchild</span> <span class="o">=</span> <span class="n">p</span><span class="p">;}</span>
+        <span class="c1">// 更新pre</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+        
+        <span class="c1">// 右子树线索化</span>
+        <span class="n">InThreading</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">rchild</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="树和森林">树和森林</h2>
+
+<h3 id="存储结构-1">存储结构</h3>
+
+<h4 id="双亲表示法">双亲表示法</h4>
+
+<p>双亲表示法要求每个结点记录其父结点（因为每个树的结点只有一个所以这个数据域的长度是固定的），所有的结点存储在一个连续的存储空间中。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 树的双亲存储表示</span>
+<span class="cp">#define MAX_TREE_SIZE 100
+</span><span class="k">typedef</span> <span class="k">struct</span> <span class="n">PTNode</span><span class="p">{</span>
+    <span class="n">TElemType</span> <span class="n">data</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">parent</span><span class="p">;</span>	<span class="c1">// 双亲位置域</span>
+<span class="p">}</span><span class="n">PTNode</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="n">PTNode</span> <span class="n">nodes</span><span class="p">[</span><span class="n">MAX_TREE_SIZE</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">;</span> 		<span class="c1">// 结点数</span>
+<span class="p">}</span><span class="n">PTree</span><span class="p">;</span>
+</code></pre></div></div>
+
+<div style="text-align: center;"><img style="height:350px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/9.png" /></div>
+
+<p>这种结构的好处在于对于特定的结点，可以在常量时间内寻找到父结点。并且反复调用PARENT可以快速的得到根结点。但是求孩子结点的时候却要遍历整个结构。</p>
+
+<h4 id="孩子表示法">孩子表示法</h4>
+
+<p>由于每个结点的孩子结点数目是不不确定的，因此需要用多重链表，即每个结点有多个指针域。</p>
+
+<p>多重链表又有两种形式:</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/10.png" /></div>
+
+<ol>
+  <li>每个结点的指针个数和树的度相同（方便但浪费空间）</li>
+  <li>每个结点的指针个数和该结点的度相同，并标识出该节点的度（节省空间但操作不便）</li>
+</ol>
+
+<p>再或者使用一个类似于单链表的形式将孩子结点串起来，n个结点就有n个孩子线性链表。n个结点指针又组成一个线性表，为了方便查找可以使用顺序存储结构。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 树的孩子链表存储表示</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">CTNode</span><span class="p">{</span>	<span class="c1">// 孩子结点</span>
+    <span class="kt">int</span> 			<span class="n">child</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">CTNode</span> 	<span class="o">*</span><span class="n">next</span><span class="p">;</span>
+<span class="p">}</span> <span class="o">*</span> <span class="n">ChildPtr</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>			<span class="c1">// 被包装的结点</span>
+    <span class="n">TElemType</span> <span class="n">data</span><span class="p">;</span>
+    <span class="n">ChildPtr</span>	<span class="n">firstchild</span><span class="p">;</span>	<span class="c1">// 孩子链表头指针</span>
+<span class="p">}</span><span class="n">CTBox</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="n">CTBox</span> <span class="n">nodes</span><span class="p">[</span><span class="n">MAX_TREE_SIZE</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">r</span><span class="p">;</span>			<span class="c1">// 结点数和根的位置 </span>
+<span class="p">}</span><span class="n">CTree</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>如果在结点处附带父节点信息，同样可以实现父结点的快速查找。</p>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/11.png" /></div>
+
+<h3 id="森林和二叉树互换">森林和二叉树互换</h3>
+
+<div style="text-align: center;"><img style="height:;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/12.png" /></div>
+
+<p>右子树就是兄弟，左子树就是第一个子树。</p>
+
+<h3 id="遍历森林">遍历森林</h3>
+
+<p>先化成对应二叉树，再遍历。</p>
+
+<h2 id="应用">应用</h2>
+
+<h3 id="等价问题">等价问题</h3>
+
+<p>对于已知的m个偶对，构建等价类。本质上就是使用树来构建<strong>并查集</strong>。</p>
+
+<ol>
+  <li>构造每个单一元素为根的单结点树的森林。<strong>并且该森林中的每个树的每个结点都指向其父结点</strong>。</li>
+  <li>重复读入偶对，分别判断x,y所在的子集（树），若相同则下一对。若不同，则将$S_j$复制并入$S_i$。</li>
+</ol>
+
+<p>所以重要的操作只有两个，<strong>查找某个元素的所在树的根结点</strong> 和 <strong>将树和树合并</strong>。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// MFSet使用树的双亲表存储表示 （它其实是一个森林）</span>
+<span class="kt">int</span> <span class="nf">find_mfset</span><span class="p">(</span><span class="n">MFSet</span> <span class="n">S</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">){</span>
+    <span class="c1">// 找森林（集合）S中，i结点所在的树的根结点(根结点的parent &lt;= 0(应该是0))</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">S</span><span class="p">.</span><span class="n">n</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    
+    <span class="k">for</span><span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">j</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">Status</span> <span class="nf">merge_mfset</span><span class="p">(</span><span class="n">MFSet</span> <span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">){</span>
+    <span class="c1">// 将j结点为根的树 并 到i结点为根的树</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">S</span><span class="p">.</span><span class="n">n</span> <span class="o">||</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="n">S</span><span class="p">.</span><span class="n">n</span><span class="p">)</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+    <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">parent</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">find_mfset</code>的复杂度为$O(深度)$,<code class="language-plaintext highlighter-rouge">merge_mfset</code>的复杂度为$O(1)$。一个森林n个结点，需要n-1次查并操作，所以复杂度为$O(n^2)$</p>
+
+<p><strong>优化</strong></p>
+
+<p>若每次合并的时候都是少结点的集合像多的集合合并（<del>因为少结点的集合 要么不给多结点的集合增加更多的深度，要么最多只有少集合的最大深度</del>），其深度不会超过$\lfloor \log_2n \rfloor + 1$，从而复杂度捡到少$O(nlogn)$。 根结点的parent为负数，是其包含的所有结点的计数的负数。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">mix_mfset</span><span class="p">(</span><span class="n">MFSet</span> <span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="kt">int</span> <span class="n">j</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">S</span><span class="p">.</span><span class="n">n</span> <span class="o">||</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="n">S</span><span class="p">.</span><span class="n">n</span><span class="p">)</span> <span class="k">return</span> <span class="n">ERROR</span><span class="p">;</span>
+    
+    <span class="k">if</span><span class="p">(</span><span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">parent</span> <span class="o">&gt;</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span><span class="p">){</span>
+        <span class="c1">// i的比j的少，因为约定是负数</span>
+        <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span> <span class="o">+=</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">parent</span><span class="p">;</span>
+        <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">parent</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+        <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">parent</span> <span class="o">+</span><span class="err">`</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span><span class="p">;</span>
+        <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">OK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>再优化</strong></p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">fix_mfset</span><span class="p">(</span><span class="n">MFSet</span> <span class="o">&amp;</span><span class="n">S</span><span class="p">,</span> <span class="kt">int</span> <span class="n">i</span><span class="p">){</span>
+    <span class="c1">// 确定i所在的自己，并将从i至根路径上所有结点都变成根的孩子结点</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">S</span><span class="p">.</span><span class="n">n</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    
+    <span class="k">for</span><span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">parent</span><span class="p">);</span>
+    <span class="k">for</span><span class="p">(</span><span class="n">k</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span> <span class="n">k</span> <span class="o">!=</span> <span class="n">j</span><span class="p">;</span> <span class="n">k</span> <span class="o">=</span> <span class="n">t</span><span class="p">){</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">parent</span><span class="p">;</span>
+        <span class="n">S</span><span class="p">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">parent</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">j</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>其复杂度为$O(na(n))$，对于通常正整数n，$a(n) &lt;= 4$。</p>
+
+<h3 id="赫夫曼">赫夫曼</h3>
+
+<h4 id="最优二叉树赫夫曼树">最优二叉树（赫夫曼树）</h4>
+
+<p>赫夫曼树的构造方法：</p>
+
+<ol>
+  <li>每个带权结点看成独立的树，共n个结点（独立的树）在集合S中。</li>
+  <li>权值最小的两个树构成新的二叉树
+    <ol>
+      <li>在S中去除这两个结点</li>
+      <li>生成的二叉树的根结点的权值为两结点之和</li>
+      <li>生成的二叉树的根结点加入到集合S中</li>
+    </ol>
+  </li>
+  <li>重复1,2</li>
+</ol>
+
+<h4 id="赫夫曼编码">赫夫曼编码</h4>
+
+<p>对于需要传输的信息，可以使用二进制的方式来<strong>辨别</strong>传输信息中的<strong>基础字符</strong>（例如’ABCAB’中的’A’，’B’，’C’）。</p>
+
+<p>对于不同元素的编码有两个原则：</p>
+
+<ol>
+  <li>不存在二义性</li>
+  <li>总长越小越好（出现频率低的字符用更小的串）</li>
+</ol>
+
+<p>不存在二义性的编码只映射一个字符的二进制串被称作<strong>前缀码</strong>。</p>
+
+<p>为满足第一个原则，最自然的方法是使用二叉树，将左分支设置为0，又分支设置为1。再约定从上到下组成的串，必定只能映射到一个叶子结点（字符元素）因此不会存在二义性。</p>
+
+<div style="text-align: center;"><img style="height:250px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/13.png" /></div>
+
+<p>对于第二个原则，则可以正好对应的二叉树是赫夫曼树。</p>
+
+<h5 id="赫夫曼编码的实现">赫夫曼编码的实现</h5>
+
+<p>因为赫夫曼树是正则二叉树所以n个叶子结点的话，有2n-1个结点。所以存储在一个2n-1长度的数组里，n个叶子结点用来代表n个字符。</p>
+
+<ol>
+  <li>
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 赫夫曼树和赫夫曼编码的存储表示</span>
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">weight</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">parent</span><span class="p">,</span> <span class="n">lchild</span><span class="p">,</span> <span class="n">rchild</span><span class="p">;</span>
+<span class="p">}</span><span class="n">HTNode</span><span class="p">,</span> <span class="o">*</span> <span class="n">HuffmanTree</span><span class="p">;</span> <span class="c1">// 赫夫曼树</span>
+   
+<span class="k">typedef</span> <span class="kt">char</span> <span class="o">**</span> <span class="n">HuffmanCode</span><span class="p">;</span> <span class="c1">// 赫夫曼编码表</span>
+   
+<span class="kt">void</span> <span class="nf">HuffmanCoding</span><span class="p">(</span><span class="n">HuffmanTree</span> <span class="o">&amp;</span><span class="n">HT</span><span class="p">,</span> <span class="n">HuffmanCode</span> <span class="o">&amp;</span><span class="n">HC</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">w</span><span class="p">,</span> <span class="kt">int</span> <span class="n">n</span><span class="p">){</span>
+ 	<span class="c1">// n 为n个字符， w 为每个字符的权值</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">HT</span> <span class="o">=</span> <span class="p">(</span><span class="n">HuffmanTree</span><span class="p">)</span><span class="n">malloc</span><span class="p">((</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">HTNode</span><span class="p">));</span>	 <span class="c1">// 申请空间，因为n是动态的所以动态申请，第0号位不使用</span>
+       
+    <span class="k">for</span><span class="p">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">HT</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">,</span><span class="o">++</span><span class="n">p</span><span class="p">,</span><span class="o">++</span><span class="n">w</span><span class="p">){</span>
+        <span class="c1">// 前n个结点为叶子结点</span>
+        <span class="c1">// 初始化叶子结点的权值到对应的字符频率</span>
+        <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="p">{</span><span class="o">*</span><span class="n">w</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">};</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">m</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
+        <span class="c1">// 构建赫夫曼树</span>
+        <span class="c1">// 在HT[1..i-1]中选择parent为0且weight最小的两个结点，其序号分别为s1,s2</span>
+        <span class="n">Select</span><span class="p">(</span><span class="n">HT</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">s2</span><span class="p">);</span>
+        <span class="n">HT</span><span class="p">[</span><span class="n">s1</span><span class="p">].</span><span class="n">parent</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span> <span class="n">HT</span><span class="p">[</span><span class="n">s2</span><span class="p">].</span><span class="n">parent</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+        <span class="n">HT</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">lchild</span> <span class="o">=</span> <span class="n">s1</span><span class="p">;</span> <span class="n">HT</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">rchild</span> <span class="o">=</span> <span class="n">s2</span><span class="p">;</span>
+        <span class="n">HT</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">weight</span> <span class="o">=</span> <span class="n">HT</span><span class="p">[</span><span class="n">s1</span><span class="p">].</span><span class="n">weight</span> <span class="o">+</span> <span class="n">HT</span><span class="p">[</span><span class="n">s2</span><span class="p">].</span><span class="n">weight</span><span class="p">;</span>
+    <span class="p">}</span>
+       
+    <span class="c1">// 从叶子到根逆向求每个字符的赫夫曼编码</span>
+    <span class="c1">// 分配n个字符编码的头指针向量</span>
+    <span class="n">HC</span> <span class="o">=</span> <span class="p">(</span><span class="n">HuffmanCode</span><span class="p">)</span> <span class="n">malloc</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">));</span>	
+    <span class="c1">// 分配求单个字符编码的工作空间（单个字符的 最大 n，并不是最终串长）,并且这个空间可以每个字符循环利用</span>
+    <span class="n">cd</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+    <span class="n">cd</span><span class="p">[</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="err">`\</span><span class="mi">0</span><span class="err">`</span><span class="p">;</span>
+    <span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">c</span> <span class="o">=</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">HT</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">parent</span><span class="p">;</span> <span class="n">f</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">c</span><span class="o">=</span><span class="n">f</span><span class="p">,</span><span class="n">f</span><span class="o">=</span><span class="n">HT</span><span class="p">){</span>
+            <span class="c1">// 从叶子结点的上一个结点开始一个一个判断是父结点的左子结点还是右子结点</span>
+            <span class="c1">// 然后从串的尾部开始设置</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">HT</span><span class="p">[</span><span class="n">f</span><span class="p">].</span><span class="n">lchild</span> <span class="o">==</span> <span class="n">c</span><span class="p">)</span> <span class="n">cd</span><span class="p">[</span><span class="o">--</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="s">"0"</span><span class="p">;</span>
+            <span class="k">else</span> <span class="n">cd</span><span class="p">[</span><span class="o">--</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="s">"1"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="c1">// 最中单个字符对应的串长确定</span>
+        <span class="n">HC</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">mallock</span><span class="p">((</span><span class="n">n</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+        <span class="n">strcpy</span><span class="p">(</span><span class="n">HC</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="o">&amp;</span><span class="n">cd</span><span class="p">[</span><span class="n">start</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="n">free</span><span class="p">(</span><span class="n">cd</span><span class="p">);</span>
+<span class="p">}</span>
+   
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p>同样也可以从根结点出发求得赫夫曼编码。 不论是从叶子还是从根计算赫夫曼编码，遍历的顺序（选择的字符的顺序）都是 左到底，右，继续做到底，右…。发现的所有叶子结点的顺序。</p>
+
+<div style="text-align: center;"><img style="height:250px;width:;" alt="" title="" src="https://ss.caihuashuai.com/StaticData/Blog/Tree/14.png" /></div>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 无栈 非递归 遍历赫夫曼树，求赫夫曼编码</span>
+<span class="n">HC</span> <span class="o">=</span> <span class="p">(</span><span class="n">HuffmanCode</span><span class="p">)</span><span class="n">malloc</span><span class="p">((</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="nf">sizeof</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">));</span>
+<span class="c1">// 根据上述的构造 m 一定是根结点</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">m</span><span class="p">;</span> <span class="n">cdlen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span><span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">m</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="n">HT</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 初始化每个结点的访问标志</span>
+
+<span class="k">while</span><span class="p">(</span><span class="n">p</span><span class="p">){</span>
+    <span class="c1">// 如果这个结点还没有被处理过</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">weight</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+        <span class="c1">// 设置本结点为已经初次处理，先不管到底有没有左子结点</span>
+    	<span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="c1">// 如果该结点有左子结点，切换待处理结点，且在工作空间补充对应的字符位0</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">lchild</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">){</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">lchild</span><span class="p">;</span> <span class="n">cd</span><span class="p">[</span><span class="n">cdlen</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="s">"0"</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">rchild</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+            <span class="c1">// 若它没有左子结点，又没有右子结点，那它必定是叶子结点</span>
+            
+            <span class="c1">// 这是的单个字符的赫夫曼码就处理完毕</span>
+            <span class="n">HC</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">((</span><span class="n">cdlen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+            <span class="n">cd</span><span class="p">[</span><span class="n">cdlen</span><span class="p">]</span> <span class="o">=</span> <span class="s">"</span><span class="se">\0</span><span class="s">"</span><span class="p">;</span>
+            <span class="n">strcpy</span><span class="p">(</span><span class="n">HC</span><span class="p">[</span><span class="n">p</span><span class="p">],</span><span class="n">cd</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">weight</span> <span class="o">==</span> <span class="mi">1</span><span class="p">){</span>
+        <span class="c1">// 如果当前结点已经处理过了 左子结点 </span>
+        
+        <span class="c1">// 将其状态位设置为已经处理过了 右子结点，先不管到底有没有右子结点</span>
+        <span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">rchild</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">){</span>
+            <span class="c1">// 如果它存在右子结点，切换待处理结点，且在工作空间补充对应的字符位1</span>
+      		<span class="n">p</span> <span class="o">=</span> <span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">rchild</span><span class="p">;</span>
+            <span class="n">cd</span><span class="p">[</span><span class="n">cdlen</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="s">"1"</span><span class="p">;</span>
+        <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+            <span class="c1">// 如果待处理结点 已经处理完毕了右子结点</span>
+            
+            <span class="c1">// 就让待处理结点回退到上一层（去继续处理右子结点）</span>
+            
+            <span class="c1">// 我认为这句置空没有意义，因为不会再回来处理这个结点了，这个结点下的所有结点都处理完毕了，仅仅是设置成和初始化一样的值罢了</span>
+            <span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">weight</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            
+            <span class="c1">// 待处理接待结点回溯到上一层结点，编码长度减1</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">HT</span><span class="p">[</span><span class="n">p</span><span class="p">].</span><span class="n">parent</span><span class="p">;</span>
+            <span class="o">--</span><span class="n">cdlen</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+:ET
