@@ -1,0 +1,90 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: LiangLab
+moto: May the code also cure you.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://emous.github.io" # the base hostname & protocol for your site
+owner: LiangLab
+
+permalink: /:year/:month/:day/:title/
+
+# other links
+email: devtsai@outlook.com
+blogger_username: Liang
+github_username:  emous
+stackoverflow_href: https://stackoverflow.com/users/9212741/anon
+
+twitter_username: 
+facebook_username: 
+weibo_username: 
+zhihu_username: 
+linkedIn_username: 
+dribbble_username:
+
+description_footer:
+
+# comments
+# two ways to comment, only choose one, and use your own short name
+# 两种评论插件，选一个就好了，使用自己的 short_name
+duoshuo_shortname: #hygblog
+disqus_shortname: emous-github-io
+
+# statistic analysis 统计代码
+# 百度统计 id，将统计代码替换为自己的百度统计id，即
+# hm.src = "//hm.baidu.com/hm.js?xxxxxxxxxxxx";
+# xxxxx字符串
+# baidu_tongji_id: cf8506e0ef223e57ff6239944e5d46a4
+
+google_analytics_id: UA-137230515-1 # google 分析追踪id
+
+# Build settings
+markdown: kramdown
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# port
+# port: 1234
+
+# url
+category_dir: category/
+tag_dir: tag/
+
+
+# 摘要显示分隔符
+# excerpt 
+excerpt_separator: "\n___"
+
+
+
+# paginate
+plugins: 
+  - jekyll-paginate
+  - jekyll-seo-tag
+  #- jekyll-sitemap
+paginate: 6
+
+
+demos:
+  page_id: kksds
+  # error occurs: true -> alert() , false -> console.log()
+  debug: true
+
+  # default setting 
+  file_suffix:
+    ignore_cap: true
+    suffix_pattern:
+      html: ["html","htm"]
+      js: ["js"]
+      css: ["css"]
+
+exclude: [".idea/"]
+
+static_data_host: "https://ss.caihuashuai.com/StaticData/Blog"
